@@ -7,9 +7,18 @@
     <meta name="description" content="모바일 판타지 텍스트 TRPG - 모험가의 검과 솥" />
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="ui-polish.css" />
     <title>모험가의 검과 솥</title>
   </head>
-  <body>
+  <body class="is-locked">
+    <section id="start-screen" class="start-screen" aria-label="게임 시작 화면">
+      <div class="start-rune">⚔</div>
+      <p class="start-kicker">A TABLETOP FANTASY SURVIVAL</p>
+      <h1>모험가의<br><em>검과 솥</em></h1>
+      <p class="start-copy">굶주림과 괴물, 그리고 당신의 선택이<br>한 편의 모험담을 만듭니다.</p>
+      <button id="start-button" class="start-button" type="button">TOUCH TO START <span>↵</span></button>
+      <p class="start-hint">탐험 · 전투 · 요리 · 운명</p>
+    </section>
     <main class="app-shell">
       <header>
         <p class="eyebrow">FANTASY SURVIVAL TEXT TRPG</p>
@@ -29,5 +38,6 @@
       </section>
     </main>
     <script type="module" src="app.js"></script>
+    <script src="start.js"></script>
   </body>
 </html>
