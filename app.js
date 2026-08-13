@@ -15,6 +15,8 @@ const ITEMS = {
   bitterCap: { id: "bitterCap", name: "쓴갓 버섯", type: "ingredient", tags: ["버섯", "해독"], toxicity: 1 }
 };
 
+window.ITEMS = ITEMS;
+
 class GameEngine {
   constructor() {
     this.player = this.createPlayer("리아", "human");
@@ -80,6 +82,7 @@ class CookingSystem {
 }
 
 const game = new GameEngine();
+window.game = game;
 function bar(label, value, max, className = "") { return `<div class="meter"><div class="meter-label"><span>${label}</span><span>${value}/${max}</span></div><div class="bar ${className}"><span style="width:${(value / max) * 100}%"></span></div></div>`; }
 function render(g) {
   const p = g.player; const race = RACES[p.raceId];

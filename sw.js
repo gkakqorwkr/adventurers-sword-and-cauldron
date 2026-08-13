@@ -1,5 +1,5 @@
-const CACHE = "sword-cauldron-v2";
-const ASSETS = ["./", "./index.html", "./styles.css", "./ui-polish.css", "./app.js", "./start.js", "./manifest.webmanifest"];
+const CACHE = "sword-cauldron-v3";
+const ASSETS = ["./", "./index.html", "./styles.css", "./ui-polish.css", "./codex.css", "./app.js", "./start.js", "./codex.js", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
   self.skipWaiting();
