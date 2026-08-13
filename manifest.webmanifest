@@ -1,0 +1,9 @@
+{
+  "name": "모험가의 검과 솥",
+  "short_name": "검과 솥",
+  "lang": "ko",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#17110d",
+  "theme_color": "#24170f"
+}

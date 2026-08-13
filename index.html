@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#24170f" />
+    <meta name="description" content="모바일 판타지 텍스트 TRPG - 모험가의 검과 솥" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>모험가의 검과 솥</title>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header>
+        <p class="eyebrow">FANTASY SURVIVAL TEXT TRPG</p>
+        <h1>모험가의 검과 솥</h1>
+        <p id="location" class="location">잿불 길드의 야영지</p>
+      </header>
+
+      <section id="hero-card" class="card hero-card"></section>
+      <section id="scene" class="card scene" aria-live="polite"></section>
+      <section class="card actions">
+        <h2>행동</h2>
+        <div id="action-list" class="button-grid"></div>
+      </section>
+      <section class="card log-card">
+        <h2>모험 기록</h2>
+        <ol id="log" class="log"></ol>
+      </section>
+    </main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

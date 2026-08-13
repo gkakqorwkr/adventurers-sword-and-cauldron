@@ -1,0 +1,17 @@
+:root { color-scheme: dark; font-family: system-ui, -apple-system, "Noto Sans KR", sans-serif; background: #17110d; color: #f8e8c8; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; background: radial-gradient(circle at top, #4b3020, #17110d 48%); }
+.app-shell { width: min(100%, 720px); margin: auto; padding: 22px 16px 40px; }
+header { text-align: center; margin: 10px 0 18px; }
+h1 { margin: 4px 0; font-size: clamp(1.8rem, 7vw, 2.7rem); letter-spacing: -.05em; }
+h2 { font-size: 1rem; margin: 0 0 12px; color: #f4c66a; }
+.eyebrow { color: #d79758; font-size: .72rem; font-weight: 700; letter-spacing: .14em; margin: 0; }
+.location { margin: 4px 0; opacity: .72; font-size: .9rem; }
+.card { background: rgba(31, 20, 14, .91); border: 1px solid rgba(231, 177, 95, .28); border-radius: 14px; padding: 16px; margin: 12px 0; box-shadow: 0 12px 28px rgba(0,0,0,.18); }
+.hero-card { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+.hero-name { margin: 0; font-size: 1.25rem; }.hero-meta { margin: 4px 0 0; color: #d7c2a5; font-size: .85rem; }
+.meter { margin: 10px 0 0; }.meter-label { display:flex; justify-content:space-between; font-size:.78rem; margin-bottom:4px; }.bar { height:8px; background:#4a352b; border-radius:9px; overflow:hidden; }.bar > span { display:block; height:100%; border-radius:9px; background:#c75a46; }.bar.stamina > span { background:#ddad48; }.bar.hunger > span { background:#5dac77; }
+.stats { text-align:right; font-size: .78rem; line-height: 1.65; color: #dac8a9; }.stats strong { color:#fff0ca; }
+.scene { min-height: 120px; line-height: 1.7; }.scene h2 { font-size:1.2rem; color:#fff0ca; }.scene p { margin: 8px 0 0; }
+.button-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:9px; } button { appearance:none; border:1px solid #a76537; background:#55311e; color:#fff0cf; padding:12px 10px; border-radius:9px; font:inherit; font-size:.9rem; cursor:pointer; min-height:48px; } button:hover, button:focus-visible { background:#754426; outline:2px solid #f4c66a; outline-offset:2px; } button.danger { border-color:#ab5443; background:#642b24; } button.utility { background:#293f34; border-color:#528467; }.log { max-height: 225px; overflow-y:auto; padding-left:20px; margin:0; font-size:.87rem; line-height:1.5; color:#d9c4a6; }.log li { margin: 6px 0; }.muted { color:#b9a58a; }
+@media (max-width: 410px) { .button-grid { grid-template-columns:1fr; } .hero-card { grid-template-columns:1fr; }.stats { text-align:left; display:flex; gap:9px; flex-wrap:wrap; } }
