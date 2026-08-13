@@ -5,6 +5,7 @@ function startAdventure() {
   document.body.classList.remove("is-locked");
   startScreen.setAttribute("aria-hidden", "true");
   startButton.blur();
+  if (typeof window.showCharacterCreator === "function") window.showCharacterCreator();
 }
 
 startButton.addEventListener("click", startAdventure);
