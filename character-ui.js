@@ -10,7 +10,13 @@
   const GEAR = {
     rustSword: { name: "낡은 길드 검", icon: "⚔", slot: "weapon", label: "무기", mods: { strength: 1 }, description: "길드가 초보 모험가에게 지급한 단검." },
     leatherCoat: { name: "여행자 가죽 코트", icon: "🧥", slot: "armor", label: "방어구", mods: { constitution: 1 }, description: "비바람과 작은 상처를 막아 준다." },
-    amberCharm: { name: "호박 부적", icon: "📿", slot: "accessory", label: "장신구", mods: { wisdom: 1 }, description: "마음의 중심을 잡아 주는 작은 부적." }
+    amberCharm: { name: "호박 부적", icon: "📿", slot: "accessory", label: "장신구", mods: { wisdom: 1 }, description: "마음의 중심을 잡아 주는 작은 부적." },
+    boarSpear: { name: "뿔멧돼지 사냥창", icon: "🔱", slot: "weapon", label: "무기", mods: { strength: 2 }, price: 45, description: "뿔을 박아 만든 묵직한 사냥창." },
+    emberDagger: { name: "잿불 단검", icon: "🗡", slot: "weapon", label: "무기", mods: { agility: 1, intelligence: 1 }, price: 70, description: "불도마뱀 비늘을 벼려 만든 날카로운 칼." },
+    spiderSilkVest: { name: "거미줄 조끼", icon: "🥋", slot: "armor", label: "방어구", mods: { agility: 2 }, price: 60, description: "가볍고 질긴 동굴거미 실로 엮었다." },
+    mossAegis: { name: "이끼거북 방패", icon: "🛡", slot: "armor", label: "방어구", mods: { constitution: 2 }, price: 80, description: "무거운 등갑으로 만든 든든한 방패." },
+    moonRing: { name: "달빛나방 반지", icon: "💍", slot: "accessory", label: "장신구", mods: { wisdom: 2 }, price: 75, description: "달빛이 스며든 날개 조각을 세공했다." },
+    mimicLocket: { name: "미믹 자물쇠 목걸이", icon: "🔐", slot: "accessory", label: "장신구", mods: { charisma: 2 }, price: 90, description: "기묘한 울림으로 협상 상대의 시선을 붙든다." }
   };
   const ITEMS = {
     fieldKnife: { name: "야전 나이프", icon: "🔪", type: "도구", description: "마물 손질에 쓰는 날카로운 칼." },
@@ -43,14 +49,15 @@
   let game, modal, dock, creator, state;
 
   function esc(value) { return String(value).replace(/[&<>"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char])); }
-  function item(id) { return GEAR[id] || ITEMS[id] || { name: id, icon: "?", type: "미확인" }; }
+  function item(id) { return GEAR[id] || ITEMS[id] || window.ITEMS?.[id] || { name: id, icon: "?", type: "미확인" }; }
   function stacks(inventory) { return inventory.reduce((out, id) => (out[id] = (out[id] || 0) + 1, out), {}); }
   function modifiersText(mods) { return Object.entries(mods).map(([key, value]) => `${STAT_NAMES[key]} +${value}`).join(" · "); }
   function recompute(player) {
-    const race = RACES[player.raceId]; const base = player.baseAttributes || player.attributes;
+    const race = RACES[player.raceId]; const base = player.baseAttributes || (player.baseAttributes = { ...player.attributes });
     const attributes = { ...base };
     Object.entries(race.bonus).forEach(([key, value]) => attributes[key] += value);
     Object.values(player.equipment || {}).filter(Boolean).forEach(id => Object.entries(GEAR[id].mods).forEach(([key, value]) => attributes[key] += value));
+    (player.statusEffects || []).filter(effect => effect.turns > 0).forEach(effect => Object.entries(effect.mods || {}).forEach(([key, value]) => attributes[key] += value));
     player.attributes = attributes;
     player.maxHp = 14 + attributes.constitution * 3;
     player.maxStamina = 6 + attributes.wisdom * 2;
@@ -88,7 +95,9 @@
   }
   function openGrowth() {
     const p = game.player; const rows = Object.keys(STAT_NAMES).map(key => `<div class="growth-row"><span>${STAT_NAMES[key]} <small>${STAT_HELP[key]}</small></span><b>${p.attributes[key]}</b><button type="button" data-grow="${key}" ${p.unspentPoints ? "" : "disabled"}>+</button></div>`).join("");
-    openModal("성장과 능력치", "LEVEL ${p.level} · XP ${p.xp}/${p.nextLevelXp}", `<p class="growth-summary">사용 가능한 성장 포인트: <strong>${p.unspentPoints || 0}</strong></p><div class="growth-list">${rows}</div>`);
+    const effects = (p.statusEffects || []).filter(effect => effect.turns > 0);
+    const effectList = effects.length ? effects.map(effect => `<li><b>${effect.name || effect.id}</b><span>${effect.effect || "효과 적용 중"} · ${effect.turns}턴 남음</span></li>`).join("") : `<li class="effect-empty">현재 지속 효과가 없습니다.</li>`;
+    openModal("성장과 능력치", "LEVEL ${p.level} · XP ${p.xp}/${p.nextLevelXp}", `<p class="growth-summary">사용 가능한 성장 포인트: <strong>${p.unspentPoints || 0}</strong></p><div class="growth-list">${rows}</div><section class="effect-panel"><h3>지속 효과</h3><ul>${effectList}</ul></section>`);
     modal.querySelectorAll("[data-grow]").forEach(button => button.onclick = () => { if (!p.unspentPoints) return; p.baseAttributes[button.dataset.grow] += 1; p.unspentPoints -= 1; recompute(p); game.log(`${STAT_NAMES[button.dataset.grow]}이 1 올랐다.`); game.render(); openGrowth(); });
   }
   function updateDock() { if (!dock || !game) return; const p = game.player; const growth = dock.querySelector("[data-growth]"); growth.textContent = p.unspentPoints ? `✦ 성장 +${p.unspentPoints}` : "✦ 성장"; growth.classList.toggle("growth-ready", !!p.unspentPoints); }
@@ -109,11 +118,13 @@
   function appearanceRow(label, part, colors) { return `<div class="appearance-row"><label>${label}</label><div class="swatches">${colors.map(color => `<button type="button" class="swatch ${state.appearance[part] === color ? "is-selected" : ""}" style="--swatch:${color}" data-part="${part}" data-swatch="${color}"></button>`).join("")}</div></div>`; }
   function randomPortrait() { const picks = { skin: ["#c88864", "#e1ad7c", "#9b624b", "#704134"], hair: ["#342019", "#7d4b2a", "#d6ad54", "#d6d2c4"], eyes: ["#6fbd9c", "#6d9bd0", "#b67c5e", "#a594d4"] }; Object.keys(picks).forEach(key => state.appearance[key] = picks[key][Math.floor(Math.random() * picks[key].length)]); renderCreator(); }
   function confirmCreator() {
-    const p = game.player; p.name = state.name.trim() || "이름 없는 모험가"; p.raceId = state.race; p.baseAttributes = { ...state.stats }; p.appearance = { ...state.appearance }; p.level = 1; p.xp = 0; p.nextLevelXp = 10; p.unspentPoints = 0; p.equipment = { weapon: "rustSword", armor: "leatherCoat", accessory: "amberCharm" }; p.inventory = ["fieldKnife", "ironPot", "slimeGel", "bitterCap", "bitterCap", "rustSword", "leatherCoat", "amberCharm"]; p.hp = 999; p.stamina = 999; p.hunger = 78; recompute(p); game.log(`${p.name}, ${RACES[p.raceId].name} 모험가가 길드에 등록되었다.`); creator.hidden = true; game.render();
+    const p = game.player; p.name = state.name.trim() || "이름 없는 모험가"; p.raceId = state.race; p.baseAttributes = { ...state.stats }; p.appearance = { ...state.appearance }; p.level = 1; p.xp = 0; p.gold = 35; p.nextLevelXp = 10; p.unspentPoints = 0; p.statusEffects = []; p.equipment = { weapon: "rustSword", armor: "leatherCoat", accessory: "amberCharm" }; p.inventory = ["fieldKnife", "ironPot", "slimeGel", "bitterCap", "bitterCap", "rustSword", "leatherCoat", "amberCharm"]; p.hp = 999; p.stamina = 999; p.hunger = 78; recompute(p); game.log(`${p.name}, ${RACES[p.raceId].name} 모험가가 길드에 등록되었다.`); creator.hidden = true; game.render();
   }
   function showCreator() { if (!state) state = { name: "리아", race: "human", stats: { strength: 2, agility: 2, intelligence: 2, charisma: 2, constitution: 2, wisdom: 2 }, points: 8, appearance: { skin: "#c88864", hair: "#342019", eyes: "#6fbd9c" } }; creator.hidden = false; renderCreator(); }
   function boot() {
     game = window.game; if (!game) return;
+    window.GEAR = GEAR;
+    window.refreshPlayerStats = () => recompute(game.player);
     const originalRender = game.render.bind(game); game.render = () => { syncLevel(); originalRender(); };
     createCreator(); modal = createModal();
     dock = document.createElement("nav"); dock.className = "system-dock"; dock.innerHTML = `<button type="button" data-pack>🎒 가방</button><button type="button" data-book>📖 도감</button><button type="button" data-growth>✦ 성장</button>`; document.querySelector(".log-card")?.before(dock);

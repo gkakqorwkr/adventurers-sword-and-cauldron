@@ -24,17 +24,17 @@
   // 첫 번째 재료는 주 드롭(70%), 두 번째 재료는 희귀 부산물(30%)입니다.
   const combatTable = [
     ["이끼 점액괴",15,5,1,["slimeGel"]],
-    ["뿔멧돼지",23,7,2,["boarMeat","boarHorn"]],
-    ["불도마뱀",19,8,2,["emberTail","emberScale"]],
-    ["동굴거미",21,8,3,["spiderLeg","venomSac"]],
-    ["이끼거북",25,5,5,["mossShell","swampMoss"]],
+    ["뿔멧돼지",23,7,2,["boarMeat","boarHorn"],"boarSpear"],
+    ["불도마뱀",19,8,2,["emberTail","emberScale"],"emberDagger"],
+    ["동굴거미",21,8,3,["spiderLeg","venomSac"],"spiderSilkVest"],
+    ["이끼거북",25,5,5,["mossShell","swampMoss"],"mossAegis"],
     ["서리박쥐",14,6,1,["batWing","frostFang"]],
-    ["흑염소 사자",31,10,3,["blackMane","charcoalClaw"]],
-    ["수정 사슴",18,6,4,["crystalShard","venison"]],
-    ["미믹",27,9,4,["mimicTooth","mimicLock"]],
-    ["새끼용",34,11,4,["drakeScale","dragonGland"]],
-    ["달빛나방",16,7,2,["mothDust","moonWing"]],
-    ["진흙 골렘",36,9,6,["golemCore","clayChunk"]]
+    ["흑염소 사자",31,10,3,["blackMane","charcoalClaw"],"boarSpear"],
+    ["수정 사슴",18,6,4,["crystalShard","venison"],"moonRing"],
+    ["미믹",27,9,4,["mimicTooth","mimicLock"],"mimicLocket"],
+    ["새끼용",34,11,4,["drakeScale","dragonGland"],"emberDagger"],
+    ["달빛나방",16,7,2,["mothDust","moonWing"],"moonRing"],
+    ["진흙 골렘",36,9,6,["golemCore","clayChunk"],"mossAegis"]
   ];
   const npcs = [
     {id:"herbalist",name:"에나",role:"습지의 약초꾼",text:"안개에 젖은 망토를 털던 약초꾼이 당신을 바라본다. ‘버섯의 독을 다루는 법을 알고 싶나?’",choices:[{label:"약초 바구니를 함께 옮긴다",story:"에나를 도와 늪지 약초를 길드에 전달했다.",recipe:"boarStew",item:"bitterCap"},{label:"버섯 정보를 사 달라고 흥정한다",story:"에나와 거래를 택했다. 다음에는 더 좋은 값이 필요할 것이다.",item:"bitterCap"}]},
@@ -42,11 +42,13 @@
     {id:"scout",name:"사일라",role:"엘프 정찰병",text:"활시위를 늦춘 정찰병이 숲 너머를 가리킨다. ‘불도마뱀이 둥지를 옮기고 있어. 사냥꾼을 도울 생각은?’",choices:[{label:"둥지를 피해 달라는 부탁을 들어준다",story:"사일라와 함께 불도마뱀의 둥지를 비켜 갔다.",recipe:"emberSkewer",xp:4},{label:"사냥터 위치를 길드에 알린다",story:"사일라의 사냥터 정보를 길드에 보고했다.",item:"emberTail",xp:5}]},
     {id:"chef",name:"마렉",role:"떠돌이 조리사",text:"검은 솥을 닦던 마렉이 미소 짓는다. ‘마물 고기는 겁먹은 사람보다 용감한 요리사를 좋아하지.’",choices:[{label:"그의 조리 시범을 돕는다",story:"마렉의 솥 옆에서 마물 요리의 기본을 배웠다.",recipe:"spiderFritter",item:"bitterCap"},{label:"내 방식의 레시피를 들려준다",story:"마렉과 서로의 레시피를 교환했다.",recipe:"batJerky",xp:3}]}
   ];
+  const townStock = ["boarSpear", "emberDagger", "spiderSilkVest", "mossAegis", "moonRing", "mimicLocket"];
   let game, modal;
   const esc = text => String(text).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-  const itemName = id => (window.ITEMS?.[id] || extraItems[id] || {name:id}).name;
-  const itemIcon = id => (window.ITEMS?.[id] || extraItems[id] || {icon:"?"}).icon || "?";
-  function ensure() { const p=game.player; p.discoveredMonsters ||= []; p.discoveredRecipes ||= ["slimeSoup"]; p.story ||= []; return p; }
+  const itemData = id => window.GEAR?.[id] || window.ITEMS?.[id] || extraItems[id] || {name:id,icon:"?"};
+  const itemName = id => itemData(id).name;
+  const itemIcon = id => itemData(id).icon || "?";
+  function ensure() { const p=game.player; p.gold ??= 35; p.discoveredMonsters ||= []; p.discoveredRecipes ||= ["slimeSoup"]; p.story ||= []; return p; }
   function close() { modal.classList.remove("open"); }
   function open(title,kicker,html) { modal.querySelector("h2").textContent=title; modal.querySelector(".exp-modal__head p").textContent=kicker; modal.querySelector(".exp-modal__body").innerHTML=html; modal.classList.add("open"); }
   function record(title,detail) { const p=ensure(); p.story.unshift({title,detail}); p.story=p.story.slice(0,20); game.log(detail); }
@@ -61,13 +63,42 @@
   function openNpc(npc) { open(`${npc.name}과의 만남`,npc.role.toUpperCase(),`<article class="npc-card"><h3 class="npc-card__name">${npc.name}</h3><p class="npc-card__role">${npc.role}</p><p class="npc-card__text">${npc.text}</p><div class="npc-choices">${npc.choices.map((choice,index)=>`<button type="button" data-choice="${index}">${choice.label}</button>`).join("")}</div></article>`); modal.querySelectorAll("[data-choice]").forEach(button=>button.onclick=()=>chooseNpc(npc,npc.choices[Number(button.dataset.choice)])); }
   function chooseNpc(npc,choice) { const p=ensure(); if(choice.item) p.inventory.push(choice.item); if(choice.xp) p.xp+=choice.xp; if(choice.recipe) unlockRecipe(choice.recipe,`(${npc.name}에게서 배움)`); record(npc.name,choice.story); close(); game.render(); }
   function openStory() { const p=ensure(); open("갈림길의 기록","YOUR ADVENTURE",p.story.length?`<ol class="story-log">${p.story.map(entry=>`<li><b>${esc(entry.title)}</b>${esc(entry.detail)}</li>`).join("")}</ol>`:`<p class="empty-journal">아직 당신의 이야기는 첫 장입니다.<br>탐험 중 만나는 사람과 마물에게 선택을 남겨 보세요.</p>`); }
-  function rollDrops(dropPool) {
+  function shopCard(id, mode) {
+    const gear = window.GEAR?.[id];
+    if (!gear) return "";
+    const price = mode === "buy" ? gear.price : Math.floor(gear.price / 2);
+    return `<article class="shop-card"><span>${gear.icon}</span><div><h4>${gear.name}</h4><p>${gear.label} · ${Object.entries(gear.mods).map(([stat,value])=>`${({strength:"힘",agility:"민첩",intelligence:"지능",charisma:"카리스마",constitution:"건강",wisdom:"지혜"})[stat]} +${value}`).join(" · ")}</p><small>${gear.description}</small></div><button type="button" data-${mode}="${id}">${mode === "buy" ? `${price} G 구매` : `${price} G 판매`}</button></article>`;
+  }
+  function openTown() {
+    const p = ensure();
+    const owned = [...new Set(p.inventory.filter(id => window.GEAR?.[id]?.price))];
+    open("연기골 마을", `장비 상점 · ${p.gold} G`, `<p class="town-copy">숯 냄새가 감도는 작은 길목 마을이다. 대장장이 루카가 모험가의 장비를 살피며 손을 흔든다.</p><section class="shop-section"><h3>루카의 장비 상점</h3>${townStock.map(id=>shopCard(id,"buy")).join("")}</section><section class="shop-section"><h3>내 장비 판매</h3>${owned.length ? owned.map(id=>shopCard(id,"sell")).join("") : `<p class="empty-journal">판매할 장비가 없습니다.</p>`}</section>`);
+    modal.querySelectorAll("[data-buy]").forEach(button => button.onclick = () => buyGear(button.dataset.buy));
+    modal.querySelectorAll("[data-sell]").forEach(button => button.onclick = () => sellGear(button.dataset.sell));
+  }
+  function buyGear(id) {
+    const p = ensure(), gear = window.GEAR?.[id];
+    if (!gear || p.gold < gear.price) { game.log("금화가 부족하다."); return openTown(); }
+    p.gold -= gear.price; p.inventory.push(id);
+    game.log(`${gear.name}을(를) ${gear.price} G에 구매했다.`);
+    openTown(); game.render();
+  }
+  function sellGear(id) {
+    const p = ensure(), gear = window.GEAR?.[id], index = p.inventory.indexOf(id);
+    if (!gear || index < 0) return openTown();
+    Object.keys(p.equipment || {}).forEach(slot => { if (p.equipment[slot] === id) p.equipment[slot] = null; });
+    p.inventory.splice(index, 1); p.gold += Math.floor(gear.price / 2);
+    window.refreshPlayerStats?.();
+    game.log(`${gear.name}을(를) ${Math.floor(gear.price / 2)} G에 판매했다.`);
+    openTown(); game.render();
+  }
+  function rollDrops(dropPool, gearId) {
     if (dropPool.length === 1) return [...dropPool];
     // 주 드롭은 항상, 희귀 부산물은 30% 확률로 추가됩니다.
-    return [dropPool[0], ...(Math.random() < .30 ? [dropPool[1]] : [])];
+    return [dropPool[0], ...(Math.random() < .30 ? [dropPool[1]] : []), ...(gearId && Math.random() < .15 ? [gearId] : [])];
   }
-  function explore() { const p=ensure(); if(game.enemy) return; p.stamina-=2; p.hunger-=5; game.clamp(); if(!p.hp) return game.defeat(); const roll=Math.random(); if(roll<.25){ const unused=npcs.filter(npc=>!p.story.some(entry=>entry.title===npc.name)); openNpc((unused.length?unused:npcs)[Math.floor(Math.random()*(unused.length?unused:npcs).length)]); game.log("숲길에서 누군가의 발자국을 발견했다."); return; } if(roll<.77){ const max=Math.min(combatTable.length,4+Math.floor(p.level/2)); const row=combatTable[Math.floor(Math.random()*max)], enemy={name:row[0],hp:row[1],maxHp:row[1],atk:row[2],def:row[3],drops:rollDrops(row[4])}; game.enemy=enemy; game.scene="combat"; discoverMonster(enemy.name); game.log(`${enemy.name}이(가) 길을 막아섰다!`); return; } const finds=["bitterCap","slimeGel","bitterCap"]; const found=finds[Math.floor(Math.random()*finds.length)]; p.inventory.push(found); game.log(`${itemName(found)}을(를) 발견했다.`); }
+  function explore() { const p=ensure(); if(game.enemy) return; game.advanceTurn(); p.stamina-=2; p.hunger-=5; game.clamp(); if(!p.hp) return game.defeat(); const roll=Math.random(); if(roll<.12){ openTown(); game.log("연기골 마을의 장터에 도착했다."); return; } if(roll<.32){ const unused=npcs.filter(npc=>!p.story.some(entry=>entry.title===npc.name)); openNpc((unused.length?unused:npcs)[Math.floor(Math.random()*(unused.length?unused:npcs).length)]); game.log("숲길에서 누군가의 발자국을 발견했다."); return; } if(roll<.80){ const max=Math.min(combatTable.length,4+Math.floor(p.level/2)); const row=combatTable[Math.floor(Math.random()*max)], enemy={name:row[0],hp:row[1],maxHp:row[1],atk:row[2],def:row[3],drops:rollDrops(row[4],row[5])}; game.enemy=enemy; game.scene="combat"; discoverMonster(enemy.name); game.log(`${enemy.name}이(가) 길을 막아섰다!`); return; } const finds=["bitterCap","slimeGel","bitterCap"]; const found=finds[Math.floor(Math.random()*finds.length)]; p.inventory.push(found); game.log(`${itemName(found)}을(를) 발견했다.`); }
   function upgradePortrait(node) { if(node.tagName==="CANVAS") return; const canvas=document.createElement("canvas"); canvas.width=112; canvas.height=132; canvas.className="portrait"; node.replaceWith(canvas); const ctx=canvas.getContext("2d"), cs=getComputedStyle(node), skin=cs.getPropertyValue("--skin").trim()||"#c88864", hair=cs.getPropertyValue("--hair").trim()||"#342019", eyes=cs.getPropertyValue("--eyes").trim()||"#6fbd9c"; const race=document.querySelector(".race-choice.is-selected strong")?.textContent||"인간", seed=(skin+hair+eyes).split("").reduce((sum,char)=>sum+char.charCodeAt(0),0), style=seed%3; ctx.imageSmoothingEnabled=false; ctx.fillStyle="#18100e";ctx.fillRect(0,0,112,132);ctx.fillStyle="#3f281f";ctx.fillRect(8,8,96,116);ctx.fillStyle="#513225";ctx.fillRect(13,13,86,84);ctx.fillStyle="#2a1b18";ctx.fillRect(0,95,112,37);ctx.fillStyle=skin;ctx.fillRect(31,33,50,57);ctx.fillRect(36,88,40,19); if(race==="엘프"){ctx.fillRect(22,49,10,16);ctx.fillRect(80,49,10,16);} if(race==="수인"){ctx.fillStyle=hair;ctx.fillRect(27,19,16,20);ctx.fillRect(69,19,16,20);} ctx.fillStyle=hair;if(style===0){ctx.fillRect(26,22,60,28);ctx.fillRect(31,45,50,11);}else if(style===1){ctx.fillRect(27,20,56,20);ctx.fillRect(25,37,17,29);ctx.fillRect(70,37,17,29);}else{ctx.fillRect(25,22,62,16);ctx.fillRect(30,35,53,12);ctx.fillRect(25,43,12,19);}ctx.fillStyle="#271917";ctx.fillRect(41,58,8,5);ctx.fillRect(63,58,8,5);ctx.fillStyle=eyes;ctx.fillRect(43,59,4,4);ctx.fillRect(65,59,4,4);ctx.fillStyle="#7b4738";ctx.fillRect(52,72,9,3);ctx.fillStyle="#d8a27a";ctx.fillRect(28,107,56,5);ctx.fillStyle="#b1783f";ctx.fillRect(16,114,80,12);ctx.fillStyle="#e1b86c";ctx.fillRect(51,117,10,10);ctx.strokeStyle="#d3954c";ctx.lineWidth=3;ctx.strokeRect(3,3,106,126); }
-  function boot() { game=window.game; if(!game) return; Object.assign(window.ITEMS,extraItems); modal=document.createElement("div");modal.className="exp-modal";modal.innerHTML='<div class="exp-modal__shade"></div><section class="exp-modal__panel"><header class="exp-modal__head"><div><p></p><h2></h2></div><button class="exp-modal__close" type="button">×</button></header><div class="exp-modal__body"></div></section>';document.body.append(modal);modal.querySelector(".exp-modal__shade").onclick=close;modal.querySelector(".exp-modal__close").onclick=close;const previousRender=game.render.bind(game);game.render=()=>{ensure();if(game.enemy)discoverMonster(game.enemy.name);previousRender();};game.explore=explore;game.cooking.cook=openCooking;const dock=document.querySelector(".system-dock");if(dock){dock.querySelector("[data-book]").onclick=openBook;const story=document.createElement("button");story.type="button";story.className="story-button";story.textContent="📜 이야기";story.onclick=openStory;dock.append(story);}const watch=()=>document.querySelectorAll(".portrait:not(canvas)").forEach(upgradePortrait);new MutationObserver(watch).observe(document.body,{childList:true,subtree:true});watch(); }
+  function boot() { game=window.game; if(!game) return; Object.assign(window.ITEMS,extraItems); modal=document.createElement("div");modal.className="exp-modal";modal.innerHTML='<div class="exp-modal__shade"></div><section class="exp-modal__panel"><header class="exp-modal__head"><div><p></p><h2></h2></div><button class="exp-modal__close" type="button">×</button></header><div class="exp-modal__body"></div></section>';document.body.append(modal);modal.querySelector(".exp-modal__shade").onclick=close;modal.querySelector(".exp-modal__close").onclick=close;const previousRender=game.render.bind(game);game.render=()=>{ensure();if(game.enemy)discoverMonster(game.enemy.name);previousRender();};const originalRest=game.rest.bind(game);game.rest=()=>{originalRest();game.advanceTurn();};const originalAttack=game.combat.attack.bind(game.combat);game.combat.attack=(...args)=>{if(!game.enemy)return;originalAttack(...args);game.advanceTurn();};game.explore=explore;game.cooking.cook=openCooking;const dock=document.querySelector(".system-dock");if(dock){dock.querySelector("[data-book]").onclick=openBook;const story=document.createElement("button");story.type="button";story.className="story-button";story.textContent="📜 이야기";story.onclick=openStory;dock.append(story);} }
   document.addEventListener("DOMContentLoaded",boot);
 })();

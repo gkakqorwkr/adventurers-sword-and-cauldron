@@ -9,7 +9,7 @@ h2 { font-size: 1rem; margin: 0 0 12px; color: #f4c66a; }
 .location { margin: 4px 0; opacity: .72; font-size: .9rem; }
 .card { background: rgba(31, 20, 14, .91); border: 1px solid rgba(231, 177, 95, .28); border-radius: 14px; padding: 16px; margin: 12px 0; box-shadow: 0 12px 28px rgba(0,0,0,.18); }
 .hero-card { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
-.hero-name { margin: 0; font-size: 1.25rem; }.hero-meta { margin: 4px 0 0; color: #d7c2a5; font-size: .85rem; }
+.hero-name { margin: 0; font-size: 1.25rem; }.hero-meta { margin: 4px 0 0; color: #d7c2a5; font-size: .85rem; }.active-effects { margin:10px 0 0; color:#a9d493; font-family:"Gowun Batang",serif; font-size:.86rem; line-height:1.45; }
 .meter { margin: 10px 0 0; }.meter-label { display:flex; justify-content:space-between; font-size:.78rem; margin-bottom:4px; }.bar { height:8px; background:#4a352b; border-radius:9px; overflow:hidden; }.bar > span { display:block; height:100%; border-radius:9px; background:#c75a46; }.bar.stamina > span { background:#ddad48; }.bar.hunger > span { background:#5dac77; }
 .stats { text-align:right; font-size: .78rem; line-height: 1.65; color: #dac8a9; }.stats strong { color:#fff0ca; }
 .scene { min-height: 120px; line-height: 1.7; }.scene h2 { font-size:1.2rem; color:#fff0ca; }.scene p { margin: 8px 0 0; }

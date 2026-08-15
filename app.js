@@ -30,10 +30,23 @@ class GameEngine {
     const base = { strength: 3, agility: 3, intelligence: 3, charisma: 3, constitution: 3, wisdom: 3 };
     const race = RACES[raceId];
     for (const [stat, value] of Object.entries(race.bonus)) base[stat] += value;
-    return { name, raceId, level: 1, xp: 0, hp: 24, maxHp: 24, stamina: 12, maxStamina: 12, hunger: 78, attributes: base, statusEffects: [], inventory: ["fieldKnife", "ironPot", "slimeGel", "bitterCap"] };
+    return { name, raceId, level: 1, xp: 0, gold: 35, hp: 24, maxHp: 24, stamina: 12, maxStamina: 12, hunger: 78, attributes: base, statusEffects: [], inventory: ["fieldKnife", "ironPot", "slimeGel", "bitterCap"] };
   }
   log(message) { this.logs.unshift(message); this.logs = this.logs.slice(0, 30); }
   clamp() { const p = this.player; p.hp = Math.max(0, Math.min(p.maxHp, p.hp)); p.stamina = Math.max(0, Math.min(p.maxStamina, p.stamina)); p.hunger = Math.max(0, Math.min(100, p.hunger)); }
+  advanceTurn() {
+    const p = this.player;
+    const effects = p.statusEffects || [];
+    p.statusEffects = effects.filter(effect => {
+      if (effect.hpPerTurn) p.hp += effect.hpPerTurn;
+      effect.turns -= 1;
+      if (effect.turns > 0) return true;
+      this.log(`${effect.name || effect.id} 효과가 사라졌다.`);
+      return false;
+    });
+    window.refreshPlayerStats?.();
+    this.clamp();
+  }
   check(stat, difficulty, label) { const value = this.player.attributes[stat]; const roll = Math.floor(Math.random() * 20) + 1; const success = roll + value >= difficulty; this.log(`${label}: d20(${roll}) + ${value} ${success ? "성공" : "실패"}.`); return success; }
   explore() {
     if (this.enemy) return;
@@ -96,7 +109,9 @@ function bar(label, value, max, className = "") { return `<div class="meter"><di
 function render(g) {
   const p = g.player; const race = RACES[p.raceId];
   document.querySelector("#location").textContent = g.scene === "camp" ? "잿불 길드의 야영지" : g.scene === "combat" ? "안개 낀 숲길 — 전투" : "안개 낀 숲길";
-  document.querySelector("#hero-card").innerHTML = `<div><h2 class="hero-name">${p.name} <span class="muted">Lv.${p.level} · ${race.name}</span></h2><p class="hero-meta">${race.description}</p>${bar("HP", p.hp, p.maxHp)}${bar("STAMINA", p.stamina, p.maxStamina, "stamina")}${bar("SATIETY", p.hunger, 100, "hunger")}</div><div class="stats"><strong>힘 ${p.attributes.strength}</strong><span>민첩 ${p.attributes.agility}</span><span>지능 ${p.attributes.intelligence}</span><span>매력 ${p.attributes.charisma}</span><span>건강 ${p.attributes.constitution}</span><span>지혜 ${p.attributes.wisdom}</span><span class="muted">가방 ${p.inventory.length}</span><span class="muted">XP ${p.xp}</span></div>`;
+  const activeEffects = (p.statusEffects || []).filter(effect => effect.turns > 0);
+  const effectText = activeEffects.length ? `<p class="active-effects">${activeEffects.map(effect => `✦ ${effect.name || effect.id} ${effect.turns}턴`).join(" · ")}</p>` : "";
+  document.querySelector("#hero-card").innerHTML = `<div><h2 class="hero-name">${p.name} <span class="muted">Lv.${p.level} · ${race.name}</span></h2><p class="hero-meta">${race.description}</p>${bar("HP", p.hp, p.maxHp)}${bar("STAMINA", p.stamina, p.maxStamina, "stamina")}${bar("SATIETY", p.hunger, 100, "hunger")}${effectText}</div><div class="stats"><strong>힘 ${p.attributes.strength}</strong><span>민첩 ${p.attributes.agility}</span><span>지능 ${p.attributes.intelligence}</span><span>매력 ${p.attributes.charisma}</span><span>건강 ${p.attributes.constitution}</span><span>지혜 ${p.attributes.wisdom}</span><span class="muted">가방 ${p.inventory.length}</span><span class="muted">XP ${p.xp}</span><span class="muted">금화 ${p.gold || 0}</span></div>`;
   const scene = document.querySelector("#scene");
   scene.innerHTML = g.enemy ? `<h2>${g.enemy.name}</h2><p>HP ${Math.max(0, g.enemy.hp)}/${g.enemy.maxHp} · 공격 ${g.enemy.atk} · 방어 ${g.enemy.def}</p><p>저 괴물은 요리 가능한 재료를 품고 있다. 검을 들 것인가, 도망칠 것인가?</p>` : g.scene === "camp" ? `<h2>야영지의 작은 불꽃</h2><p>길드의 의뢰 게시판은 비어 있다. 그러나 북쪽 숲에는 사라진 사냥꾼과 기묘한 마물 요리의 소문이 떠돈다.</p>` : `<h2>안개 낀 숲길</h2><p>젖은 흙길과 낡은 돌무더기가 이어진다. 발자국, 약초, 위험이 모두 안개 속에 섞여 있다.</p>`;
   const actions = g.enemy ? [["⚔ 공격", () => g.combat.attack()], ["🏃 도주", () => g.combat.flee()]] : [["🧭 탐험", () => { g.scene = "wild"; g.explore(); }], ["🍲 요리", () => g.cooking.cook()], ["🔥 휴식", () => g.rest()], ["🎒 가방 확인", () => g.log(`가방: ${p.inventory.map(id => ITEMS[id].name).join(", ") || "비어 있음"}`)]];
