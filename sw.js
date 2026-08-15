@@ -1,4 +1,4 @@
-const CACHE = "sword-cauldron-v7";
+const CACHE = "sword-cauldron-v8";
 const ASSETS = ["./", "./index.html", "./styles.css", "./ui-polish.css", "./character-ui.css", "./expansion.css", "./gameplay-fixes.css", "./portrait-customizer.css", "./app.js", "./start.js", "./character-ui.js", "./expansion.js", "./portrait-assets.js", "./gameplay-fixes.js", "./portrait-customizer.js", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {

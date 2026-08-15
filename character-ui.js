@@ -116,8 +116,8 @@
     game = window.game; if (!game) return;
     const originalRender = game.render.bind(game); game.render = () => { syncLevel(); originalRender(); };
     createCreator(); modal = createModal();
-    dock = document.createElement("nav"); dock.className = "system-dock"; dock.innerHTML = `<button type="button" data-character>👤 인물</button><button type="button" data-pack>🎒 가방</button><button type="button" data-book>📖 도감</button><button type="button" data-growth>✦ 성장</button>`; document.querySelector(".log-card")?.before(dock);
-    dock.querySelector("[data-character]").onclick = openGrowth; dock.querySelector("[data-pack]").onclick = openInventory; dock.querySelector("[data-book]").onclick = openBook; dock.querySelector("[data-growth]").onclick = openGrowth;
+    dock = document.createElement("nav"); dock.className = "system-dock"; dock.innerHTML = `<button type="button" data-pack>🎒 가방</button><button type="button" data-book>📖 도감</button><button type="button" data-growth>✦ 성장</button>`; document.querySelector(".log-card")?.before(dock);
+    dock.querySelector("[data-pack]").onclick = openInventory; dock.querySelector("[data-book]").onclick = openBook; dock.querySelector("[data-growth]").onclick = openGrowth;
     document.addEventListener("click", event => { const button = event.target.closest("button"); if (button && button.textContent.includes("가방 확인")) { event.preventDefault(); event.stopPropagation(); openInventory(); } }, true);
     window.showCharacterCreator = showCreator; updateDock();
   }

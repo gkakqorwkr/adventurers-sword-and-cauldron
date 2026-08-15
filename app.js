@@ -58,7 +58,16 @@ class CombatSystem {
     const power = p.attributes.strength + Math.floor(Math.random() * 6) + 2 + (style === "careful" ? 1 : 0);
     const damage = Math.max(1, power - enemy.def) * (critical ? 2 : 1); enemy.hp -= damage; p.stamina -= 1;
     this.game.log(`${critical ? "치명타! " : ""}${enemy.name}에게 ${damage} 피해를 주었다.`);
-    if (enemy.hp <= 0) { enemy.drops.forEach(id => p.inventory.push(id)); p.xp += 8; this.game.log(`${enemy.name}을(를) 쓰러뜨렸다. 점액괴의 젤을 획득했다.`); this.game.enemy = null; this.game.scene = "wild"; return this.game.clamp(); }
+    if (enemy.hp <= 0) {
+      const rewards = enemy.drops || [];
+      rewards.forEach(id => p.inventory.push(id));
+      p.xp += 8;
+      const rewardNames = rewards.map(id => ITEMS[id]?.name || id).join(", ") || "아무것도";
+      this.game.log(`${enemy.name}을(를) 쓰러뜨렸다. ${rewardNames}을(를) 획득했다.`);
+      this.game.enemy = null;
+      this.game.scene = "wild";
+      return this.game.clamp();
+    }
     const evade = Math.random() * 20 + 1 + p.attributes.agility >= 16;
     if (evade) this.game.log("민첩하게 반격을 피했다."); else { const hit = Math.max(1, enemy.atk - Math.floor(p.attributes.constitution / 2)); p.hp -= hit; this.game.log(`${enemy.name}의 반격! ${hit} 피해.`); }
     this.game.clamp(); if (p.hp === 0) this.game.defeat();
