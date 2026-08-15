@@ -76,17 +76,23 @@
   function closeModal() { modal.classList.remove("is-open"); }
   function openModal(title, kicker, body) { modal.querySelector("h2").textContent = title; modal.querySelector(".game-modal__head p").textContent = kicker; modal.querySelector(".game-modal__body").innerHTML = body; modal.classList.add("is-open"); }
   function openInventory() {
-    const p = game.player; const current = stacks(p.inventory); const equipped = p.equipment || {};
-    const slots = ["weapon", "armor", "accessory"].map(slot => `<div class="equip-slot"><small>${({ weapon: "무기", armor: "방어구", accessory: "장신구" })[slot]}</small><b>${equipped[slot] ? `${GEAR[equipped[slot]].icon} ${GEAR[equipped[slot]].name}` : "비어 있음"}</b></div>`).join("");
-    const cells = Object.entries(current).map(([id, qty]) => { const data = item(id), gear = GEAR[id]; return `<article class="item-cell"><span class="item-cell__icon">${data.icon}</span><strong>${data.name}</strong><small>${gear ? `${gear.label} · ${modifiersText(gear.mods)}` : data.type}</small><b>×${qty}</b>${gear ? `<button type="button" data-equip="${id}">${equipped[gear.slot] === id ? "장착 해제" : "장착"}</button>` : ""}</article>`; });
+    const p = game.player; const current = stacks(p.inventory.filter(id => !GEAR[id]));
+    const cells = Object.entries(current).map(([id, qty]) => { const data = item(id); return `<article class="item-cell"><span class="item-cell__icon">${data.icon}</span><strong>${data.name}</strong><small>${data.type}</small><b>×${qty}</b></article>`; });
     while (cells.length < 12) cells.push(`<div class="empty-cell">+<br>빈 칸</div>`);
-    openModal("여행 가방", `${Object.keys(current).length} / 12 SLOTS`, `<p class="modal-note">같은 아이템은 한 칸에 쌓입니다. 장비를 눌러 장착하면 실제 능력치와 전투 판정에 반영됩니다.</p><div class="equip-slots">${slots}</div><div class="inventory-cells">${cells.join("")}</div>`);
+    openModal("여행 가방", `${Object.keys(current).length} / 12 SLOTS`, `<p class="modal-note">식재료, 도구, 마물 부산물을 보관합니다. 장비는 하단의 장비 탭에서 관리할 수 있습니다.</p><div class="inventory-cells">${cells.join("")}</div>`);
+  }
+  function openEquipment() {
+    const p = game.player; const current = stacks(p.inventory.filter(id => GEAR[id])); const equipped = p.equipment || {};
+    const slots = ["weapon", "armor", "accessory"].map(slot => `<div class="equip-slot"><small>${({ weapon: "무기", armor: "방어구", accessory: "장신구" })[slot]}</small><b>${equipped[slot] ? `${GEAR[equipped[slot]].icon} ${GEAR[equipped[slot]].name}` : "비어 있음"}</b></div>`).join("");
+    const cells = Object.entries(current).map(([id, qty]) => { const gear = GEAR[id]; return `<article class="item-cell"><span class="item-cell__icon">${gear.icon}</span><strong>${gear.name}</strong><small>${gear.label} · ${modifiersText(gear.mods)}</small><b>×${qty}</b><button type="button" data-equip="${id}">${equipped[gear.slot] === id ? "장착 해제" : "장착"}</button></article>`; });
+    while (cells.length < 6) cells.push(`<div class="empty-cell">+<br>장비 칸</div>`);
+    openModal("장비 관리", `${Object.keys(current).length} 종류 · ${p.gold || 0} G`, `<p class="modal-note">장비를 장착하면 능력치와 전투 판정에 즉시 반영됩니다. 여분 장비는 마을 상점에서 판매할 수 있습니다.</p><div class="equip-slots">${slots}</div><div class="inventory-cells">${cells.join("")}</div>`);
     modal.querySelectorAll("[data-equip]").forEach(button => button.onclick = () => equip(button.dataset.equip));
   }
   function equip(id) {
     const p = game.player, gear = GEAR[id]; p.equipment ||= { weapon: null, armor: null, accessory: null };
     p.equipment[gear.slot] = p.equipment[gear.slot] === id ? null : id;
-    recompute(p); game.log(`${gear.name}${p.equipment[gear.slot] ? "을 장착했다" : "을 해제했다"}. ${modifiersText(gear.mods)}`); game.render(); openInventory();
+    recompute(p); game.log(`${gear.name}${p.equipment[gear.slot] ? "을 장착했다" : "을 해제했다"}. ${modifiersText(gear.mods)}`); game.render(); openEquipment();
   }
   function openBook() {
     const monsters = MONSTERS.map(row => `<article class="monster-entry"><div class="monster-entry__icon">${row[1]}</div><div><p class="entry-meta">${row[2]} · 위협도 ${row[3]}</p><h4>${row[0]}</h4><p>${row[4]}</p><p class="drop-tag">획득: ${row[5]}</p></div></article>`).join("");
@@ -127,8 +133,8 @@
     window.refreshPlayerStats = () => recompute(game.player);
     const originalRender = game.render.bind(game); game.render = () => { syncLevel(); originalRender(); };
     createCreator(); modal = createModal();
-    dock = document.createElement("nav"); dock.className = "system-dock"; dock.innerHTML = `<button type="button" data-pack>🎒 가방</button><button type="button" data-book>📖 도감</button><button type="button" data-growth>✦ 성장</button>`; document.querySelector(".log-card")?.before(dock);
-    dock.querySelector("[data-pack]").onclick = openInventory; dock.querySelector("[data-book]").onclick = openBook; dock.querySelector("[data-growth]").onclick = openGrowth;
+    dock = document.createElement("nav"); dock.className = "system-dock"; dock.innerHTML = `<button type="button" data-pack>🎒 가방</button><button type="button" data-equipment>🛡 장비</button><button type="button" data-book>📖 도감</button><button type="button" data-growth>✦ 성장</button>`; document.querySelector(".log-card")?.before(dock);
+    dock.querySelector("[data-pack]").onclick = openInventory; dock.querySelector("[data-equipment]").onclick = openEquipment; dock.querySelector("[data-book]").onclick = openBook; dock.querySelector("[data-growth]").onclick = openGrowth;
     document.addEventListener("click", event => { const button = event.target.closest("button"); if (button && button.textContent.includes("가방 확인")) { event.preventDefault(); event.stopPropagation(); openInventory(); } }, true);
     window.showCharacterCreator = showCreator; updateDock();
   }
