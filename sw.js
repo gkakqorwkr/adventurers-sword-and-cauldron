@@ -1,5 +1,5 @@
-const CACHE = "sword-cauldron-v5";
-const ASSETS = ["./", "./index.html", "./styles.css", "./ui-polish.css", "./character-ui.css", "./expansion.css", "./app.js", "./start.js", "./character-ui.js", "./expansion.js", "./manifest.webmanifest"];
+const CACHE = "sword-cauldron-v6";
+const ASSETS = ["./", "./index.html", "./styles.css", "./ui-polish.css", "./character-ui.css", "./expansion.css", "./gameplay-fixes.css", "./app.js", "./start.js", "./character-ui.js", "./expansion.js", "./portrait-assets.js", "./gameplay-fixes.js", "./manifest.webmanifest", "./assets/portraits/human.png", "./assets/portraits/elf.png", "./assets/portraits/dwarf.png", "./assets/portraits/dragonkin.png"];
 
 self.addEventListener("install", event => {
   self.skipWaiting();
