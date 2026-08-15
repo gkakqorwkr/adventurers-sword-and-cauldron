@@ -1,0 +1,2 @@
+.portrait-variants { position:absolute; left:0; top:137px; display:flex; gap:5px; width:112px; }.portrait-variants button { width:34px; min-height:34px; padding:0; overflow:hidden; border:2px solid transparent; background:#231712; }.portrait-variants button::after { content:""; }.portrait-variants button.is-selected { border-color:#ffd989; box-shadow:0 0 0 1px #7a4928; }.portrait-variants img { display:block; width:30px; height:30px; object-fit:cover; image-rendering:pixelated; }
+.portrait-layout { padding-bottom:40px; }
