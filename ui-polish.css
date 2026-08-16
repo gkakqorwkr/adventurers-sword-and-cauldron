@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Press+Start+2P&display=swap');
 
 :root { --ink:#15100e; --paper:#e7d8b7; --gold:#e3ad59; --rust:#b25735; --moss:#789b70; --line:rgba(232,202,139,.2); }
-body { background:radial-gradient(ellipse at 50% 0%, var(--region-glow, #2b211c), #100d0c 64%); color:var(--paper); transition:background .45s ease, color .45s ease; }
+body { background-color:#100d0c; background-image:linear-gradient(rgba(11,9,8,.48), rgba(11,9,8,.76)), radial-gradient(ellipse at 50% 0%, var(--region-glow, #2b211c), #100d0c 64%), var(--region-background, none); background-size:cover, cover, cover; background-position:center; background-attachment:fixed; color:var(--paper); transition:background .55s ease, color .45s ease; }
 body::before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.3; background-image:linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.015) 1px, transparent 1px); background-size:4px 4px; mix-blend-mode:overlay; z-index:10; }
 .app-shell { padding:10px 12px 36px; }
 header { margin:8px 0 12px; display:grid; grid-template-columns:1fr auto; text-align:left; align-items:end; border-bottom:1px solid var(--line); padding:0 4px 12px; }
@@ -9,7 +9,7 @@ header .eyebrow { grid-column:1/-1; color:#c68f4a; font-family:"Press Start 2P",
 header h1 { font-family:"Gowun Batang", serif; font-weight:700; font-size:1.55rem; letter-spacing:-.09em; margin:4px 0 0; }
 header h1::before { content:"⚔ "; font-size:.7em; color:var(--gold); }
 .location { margin:0 0 4px; font-family:"Gowun Batang", serif; color:#c4af91; font-size:.78rem; text-align:right; }
-.card { border:1px solid var(--line); border-radius:3px; background:linear-gradient(135deg, rgba(49,35,27,.96), rgba(24,19,17,.96)); box-shadow:none; padding:14px; margin:9px 0; }
+.card { border:1px solid var(--line); border-radius:3px; background:linear-gradient(135deg, rgba(49,35,27,.9), rgba(24,19,17,.92)); box-shadow:none; padding:14px; margin:9px 0; }
 .hero-card { position:relative; overflow:hidden; grid-template-columns:1fr; padding:14px 14px 12px; }
 .hero-card::before { content:"PLAYER STATUS"; position:absolute; top:0; right:0; background:#5a3523; color:#f4c66a; font-family:"Press Start 2P", monospace; font-size:.38rem; padding:7px 8px; }
 .hero-name { font-family:"Gowun Batang", serif; font-size:1.36rem; padding-right:88px; }.hero-meta { color:#af987d; margin:2px 0 9px; }

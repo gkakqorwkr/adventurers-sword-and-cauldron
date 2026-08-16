@@ -13,7 +13,7 @@
     "fungalCap", "serpentFillet", "mireCore", "nectarPod", "leechPearl", "ramRib", "cinderMeat", "emberHeart", "beetleShell", "scorpionClaw",
     "thornVenison", "foxTail", "barkSap", "crocMeat", "sirenScale", "frogLeg", "salamanderMeat", "vultureWing", "buffaloRib", "ghostFlame", "crystalThread", "moleMeat", "basiliskEye", "chimeraMeat", "sunScorpionShell"
   ];
-  const relatedItemArt = { boneMarrow: 25, rustOil: 30, wormMeat: 27, magmaCore: 25, wyvernWing: 24, trollMeat: 37, volcanicEel: 32, cinderEssence: 38, harpyFeather: 29 };
+  const relatedItemArt = { boneMarrow: 25, rustOil: 30, wormMeat: 27, magmaCore: 25, wyvernWing: 24, trollMeat: 37, volcanicEel: 32, cinderEssence: 38, harpyFeather: 29, mossGel: 56 };
   const sprite = (folder, index, label) => `<img class="item-visual__sprite" src="assets/${folder}/${folder === "equipment" ? "g" : "i"}${String(index).padStart(2, "0")}.png" alt="${label}" />`;
   function setArt(collection, id, folder, index) { if (collection?.[id]) collection[id].icon = sprite(folder, index, collection[id].name || id); }
   function boot() {
