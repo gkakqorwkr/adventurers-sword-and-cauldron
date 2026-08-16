@@ -135,6 +135,53 @@
       {title:"등불 행렬의 종착지",text:"행렬은 안개 속으로 녹아들었지만, 당신의 이야기에 새로운 한 줄이 남았다.",xp:12}
     ]
   });
+  Object.assign(followups, {
+    strengthRoute:[
+      {title:"힘으로 연 숨은 길",text:"바위를 밀어내자 오래된 길드 상자가 드러났다.",gold:32},
+      {title:"힘으로 연 숨은 길",text:"바위 뒤에서 잠자던 뿔멧돼지가 튀어나왔다.",enemy:["뿔멧돼지",23,7,2,["boarMeat","boarHorn"],"boarSpear"]},
+      {title:"힘으로 연 숨은 길",text:"길은 막혀 있었지만, 몸을 단련할 수 있는 바위 지형을 기억했다.",xp:9}
+    ],
+    agilityRoute:[
+      {title:"민첩하게 넘은 덫길",text:"덫 사이에서 밀렵꾼이 떨어뜨린 금화 주머니를 발견했다.",gold:26},
+      {title:"민첩하게 넘은 덫길",text:"덫에 걸린 먹이를 노리던 동굴거미가 모습을 드러냈다.",enemy:["동굴거미",21,8,3,["spiderLeg","venomSac"],"spiderSilkVest"]},
+      {title:"민첩하게 넘은 덫길",text:"아무것도 얻지 못했지만, 발을 디딜 곳을 읽는 감각이 날카로워졌다.",xp:10}
+    ],
+    intelligenceRoute:[
+      {title:"해독한 룬의 방",text:"룬 상자 안에는 마력 결정과 조리 메모가 남아 있었다.",item:"crystalShard",recipe:"crystalTea",xp:5},
+      {title:"해독한 룬의 방",text:"룬의 마지막 글자는 미믹을 깨우는 명령이었다.",enemy:["미믹",27,9,4,["mimicTooth","mimicLock"],"mimicLocket"]},
+      {title:"해독한 룬의 방",text:"상자는 비었지만, 지식을 조합해 숨은 통로를 그려 냈다.",xp:12}
+    ],
+    charismaRoute:[
+      {title:"설득으로 얻은 소문",text:"숨어 있던 떠돌이가 미안하다며 금화와 장신구 재료를 내놓았다.",gold:30,item:"mimicLock"},
+      {title:"설득으로 얻은 소문",text:"상대가 거짓말을 하던 사이, 뒤편의 미믹이 덮쳐 왔다.",enemy:["미믹",27,9,4,["mimicTooth","mimicLock"],"mimicLocket"]},
+      {title:"설득으로 얻은 소문",text:"상대는 떠났지만, 당신의 말은 숲길의 다른 여행자들에게 퍼졌다.",xp:11}
+    ],
+    constitutionRoute:[
+      {title:"독안개 너머",text:"독안개 속에서 희귀한 해독 버섯과 금화를 발견했다.",item:"bitterCap",gold:20},
+      {title:"독안개 너머",text:"독안개를 피난처 삼던 이끼거북이 길을 막았다.",enemy:["이끼거북",25,5,5,["mossShell","swampMoss"],"mossAegis"]},
+      {title:"독안개 너머",text:"아무것도 없었지만, 몸이 독기를 견디는 법을 기억했다.",xp:10}
+    ],
+    wisdomRoute:[
+      {title:"직감이 가리킨 길",text:"직감이 이끈 곳에서 달빛나방의 가루를 찾아냈다.",item:"mothDust",gold:16},
+      {title:"직감이 가리킨 길",text:"불길함의 정체는 나뭇가지에 매달린 서리박쥐 무리였다.",enemy:["서리박쥐",14,6,1,["batWing","frostFang"]]},
+      {title:"직감이 가리킨 길",text:"길은 평범했지만, 위험을 피하는 감각이 한층 또렷해졌다.",xp:13}
+    ]
+  });
+  const statTrials = [
+    {label:"[힘] 장애물을 부수고 길을 낸다",check:{stat:"strength",difficulty:13,label:"힘으로 길 개척",success:{story:"쓰러진 나무를 밀어내고 숨은 길로 들어섰다.",followup:"strengthRoute",xp:4},failure:{story:"무리하게 나무를 밀다 어깨를 부딪혔다.",damage:3}}},
+    {label:"[민첩] 위험한 틈을 재빠르게 넘는다",check:{stat:"agility",difficulty:13,label:"민첩한 돌파",success:{story:"낙엽과 덫을 밟지 않고 흔적을 따라갔다.",followup:"agilityRoute",xp:4},failure:{story:"발을 헛디뎌 거친 덤불에 긁혔다.",damage:2}}},
+    {label:"[지능] 남겨진 흔적을 논리적으로 해독한다",check:{stat:"intelligence",difficulty:14,label:"지능으로 흔적 해독",success:{story:"기호의 규칙을 풀고 비밀 장소를 찾아냈다.",followup:"intelligenceRoute",xp:5},failure:{story:"기호를 잘못 읽어 시간을 허비했다.",stamina:-2}}},
+    {label:"[카리스마] 숨어 있는 이를 설득해 정보를 얻는다",check:{stat:"charisma",difficulty:14,label:"카리스마로 설득",success:{story:"경계하던 이가 마음을 풀고 비밀을 털어놓았다.",followup:"charismaRoute",gold:8},failure:{story:"상대는 당신을 믿지 않고 숲속으로 사라졌다."}}},
+    {label:"[건강] 독안개를 견디며 가까이 다가간다",check:{stat:"constitution",difficulty:13,label:"건강으로 독안개 견디기",success:{story:"독안개를 견뎌내고 안쪽의 흔적을 조사했다.",followup:"constitutionRoute",xp:4},failure:{story:"독안개에 기침을 하며 뒤로 물러났다.",damage:4}}},
+    {label:"[지혜] 직감으로 가장 안전한 발자국을 고른다",check:{stat:"wisdom",difficulty:14,label:"지혜로 위험 감지",success:{story:"직감이 이끄는 길을 따라 숨은 장소를 발견했다.",followup:"wisdomRoute",xp:5},failure:{story:"불길한 느낌을 늦게 알아차려 길을 돌아갔다.",stamina:-2}}}
+  ];
+  const poacherEvent = worldEvents.find(event => event.title === "밀렵꾼의 덫");
+  poacherEvent.choices.push({label:"[카리스마] 밀렵꾼에게 사과와 보상을 요구한다",check:{stat:"charisma",difficulty:15,label:"밀렵꾼 설득",success:{story:"밀렵꾼은 얼굴을 붉히며 사과하고, 죄책감에 장비 재료와 금화를 내놓았다.",item:"boarHorn",gold:28,xp:6},failure:{story:"밀렵꾼은 비웃으며 덫을 끊고 숲으로 달아났다."}}});
+  worldEvents.forEach((event,index) => { if (event.choices.length < 3) { const trial=statTrials[index % statTrials.length]; event.choices.push({label:trial.label,check:{...trial.check,success:{...trial.check.success},failure:{...trial.check.failure}}}); } });
+  npcs.find(npc=>npc.id==="herbalist").choices.push({label:"[지능] 독성균을 직접 감별한다",check:{stat:"intelligence",difficulty:13,label:"독성균 감별",success:{story:"독성의 결을 정확히 구분해 에나를 놀라게 했다.",item:"bitterCap",recipe:"spiderFritter",xp:5},failure:{story:"독성균을 잘못 만져 손끝이 저렸다.",damage:3}}});
+  npcs.find(npc=>npc.id==="cartographer").choices.push({label:"[지혜] 지도 없이 바람의 흐름을 읽는다",check:{stat:"wisdom",difficulty:14,label:"바람으로 길 찾기",success:{story:"바람과 새소리에서 길을 읽어냈다.",followup:"wisdomRoute",xp:6},failure:{story:"안개에 속아 빙 돌아왔다.",stamina:-2}}});
+  npcs.find(npc=>npc.id==="scout").choices.push({label:"[민첩] 절벽길로 몰래 정찰한다",check:{stat:"agility",difficulty:14,label:"절벽길 정찰",success:{story:"발소리 하나 없이 절벽길을 건넜다.",followup:"agilityRoute",xp:6},failure:{story:"미끄러져 무릎을 다쳤다.",damage:3}}});
+  npcs.find(npc=>npc.id==="chef").choices.push({label:"[카리스마] 마렉에게 비밀 조리법을 설득해 낸다",check:{stat:"charisma",difficulty:14,label:"조리사 설득",success:{story:"마렉은 웃으며 숨겨 둔 조리 비법을 알려 주었다.",recipe:"mimicToast",gold:15,xp:5},failure:{story:"마렉은 웃기만 하며 솥뚜껑을 닫았다."}}});
   let game, modal;
   const esc = text => String(text).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const itemData = id => window.GEAR?.[id] || window.ITEMS?.[id] || extraItems[id] || {name:id,icon:"?"};
@@ -154,7 +201,23 @@
   function cook(id) { const recipe=recipes.find(row=>row.id===id), p=ensure(); if (!canCook(recipe)) return; recipe.need.forEach(need=>p.inventory.splice(p.inventory.indexOf(need),1)); p.hunger+=recipe.hunger; p.hp+=recipe.hp; p.stamina+=recipe.stamina||0; game.clamp(); record("새로운 한 끼",`${recipe.name}을(를) 완성했다. ${recipe.effect}`); close(); game.render(); }
   function openNpc(npc) { open(`${npc.name}과의 만남`,npc.role.toUpperCase(),`<article class="npc-card"><h3 class="npc-card__name">${npc.name}</h3><p class="npc-card__role">${npc.role}</p><p class="npc-card__text">${npc.text}</p><div class="npc-choices">${npc.choices.map((choice,index)=>`<button type="button" data-choice="${index}">${choice.label}</button>`).join("")}</div></article>`); modal.querySelectorAll("[data-choice]").forEach(button=>button.onclick=()=>chooseNpc(npc,npc.choices[Number(button.dataset.choice)])); }
   function queueFollowup(id) { if (!id) return; const p=ensure(); p.pendingPlots.push(id); game.log("선택의 여파가 다음 여정에서 이어질 것이다."); }
-  function applyChoice(title, choice) { const p=ensure(); if(choice.item) p.inventory.push(choice.item); if(choice.xp) p.xp+=choice.xp; if(choice.gold) p.gold+=choice.gold; if(choice.recipe) unlockRecipe(choice.recipe,`(${title}에게서 배움)`); if(choice.followup) queueFollowup(choice.followup); record(title,choice.story); close(); game.render(); }
+  function applyChoice(title, choice) {
+    const p=ensure(); let outcome=choice;
+    if (choice.check) {
+      const test=choice.check;
+      const success=game.check(test.stat,test.difficulty,test.label || title);
+      outcome={...choice,...(success ? test.success : test.failure)};
+      game.log(success ? `${title}: 능력치 판정에 성공했다.` : `${title}: 능력치 판정에 실패했다.`);
+    }
+    if(outcome.item) p.inventory.push(outcome.item);
+    if(outcome.xp) p.xp+=outcome.xp;
+    if(outcome.gold) p.gold+=outcome.gold;
+    if(outcome.damage) p.hp-=outcome.damage;
+    if(outcome.stamina) p.stamina+=outcome.stamina;
+    if(outcome.recipe) unlockRecipe(outcome.recipe,`(${title}에게서 배움)`);
+    if(outcome.followup) queueFollowup(outcome.followup);
+    game.clamp(); record(title,outcome.story || choice.story); close(); game.render();
+  }
   function chooseNpc(npc,choice) { applyChoice(npc.name, choice); }
   function openStory() { const p=ensure(); open("갈림길의 기록","YOUR ADVENTURE",p.story.length?`<ol class="story-log">${p.story.map(entry=>`<li><b>${esc(entry.title)}</b>${esc(entry.detail)}</li>`).join("")}</ol>`:`<p class="empty-journal">아직 당신의 이야기는 첫 장입니다.<br>탐험 중 만나는 사람과 마물에게 선택을 남겨 보세요.</p>`); }
   function openWorldEvent(event) { open(event.title,event.role.toUpperCase(),`<article class="npc-card"><h3 class="npc-card__name">${event.title}</h3><p class="npc-card__role">${event.role}</p><p class="npc-card__text">${event.text}</p><div class="npc-choices">${event.choices.map((choice,index)=>`<button type="button" data-world-choice="${index}">${choice.label}</button>`).join("")}</div></article>`); modal.querySelectorAll("[data-world-choice]").forEach(button=>button.onclick=()=>applyChoice(event.title,event.choices[Number(button.dataset.worldChoice)])); }
