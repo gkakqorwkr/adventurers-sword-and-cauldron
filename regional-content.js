@@ -31,7 +31,7 @@
   const monsters = regions.flatMap(region => region.monsters.map(spec => {
     const [id, name, hp, atk, def, dropId, dropName] = spec;
     monsterImage += 1;
-    return { id, name, hp, atk, def, dropId, dropName, region: region.id, image: `assets/monsters/m${String(monsterImage).padStart(2, "0")}.png` };
+    return { id, name, hp, atk, def, dropId, dropName, region: region.id, image: `assets/monsters-v2/m${String(monsterImage).padStart(2, "0")}.png` };
   }));
   let recipeImage = 0;
   const recipes = regions.flatMap(region => region.recipes.map(spec => {

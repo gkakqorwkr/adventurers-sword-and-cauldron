@@ -92,7 +92,7 @@
   let game, modal, dock, creator, state;
 
   function esc(value) { return String(value).replace(/[&<>"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char])); }
-  function item(id) { return GEAR[id] || ITEMS[id] || window.ITEMS?.[id] || { name: id, icon: "?", type: "미확인" }; }
+  function item(id) { return GEAR[id] || window.ITEMS?.[id] || ITEMS[id] || { name: id, icon: "?", type: "미확인" }; }
   function stacks(inventory) { return inventory.reduce((out, id) => (out[id] = (out[id] || 0) + 1, out), {}); }
   function modifiersText(mods) { return Object.entries(mods).map(([key, value]) => `${STAT_NAMES[key]} +${value}`).join(" · "); }
   function recompute(player) {
