@@ -8,9 +8,9 @@
   const STAT_NAMES = { strength: "힘", agility: "민첩", intelligence: "지능", charisma: "카리스마", constitution: "건강", wisdom: "지혜" };
   const STAT_HELP = { strength: "공격력과 신체 능력", agility: "회피와 치명타", intelligence: "마력과 지식 판정", charisma: "설득과 위협", constitution: "체력과 내성", wisdom: "기력과 직관" };
   const GEAR = {
-    rustSword: { name: "낡은 길드 검", icon: "⚔", slot: "weapon", label: "무기", mods: { strength: 1 }, description: "길드가 초보 모험가에게 지급한 단검." },
-    leatherCoat: { name: "여행자 가죽 코트", icon: "🧥", slot: "armor", label: "방어구", mods: { constitution: 1 }, description: "비바람과 작은 상처를 막아 준다." },
-    amberCharm: { name: "호박 부적", icon: "📿", slot: "accessory", label: "장신구", mods: { wisdom: 1 }, description: "마음의 중심을 잡아 주는 작은 부적." },
+    rustSword: { name: "낡은 길드 검", icon: "⚔", slot: "weapon", label: "무기", mods: { strength: 1 }, price: 24, description: "길드가 초보 모험가에게 지급한 단검." },
+    leatherCoat: { name: "여행자 가죽 코트", icon: "🧥", slot: "armor", label: "방어구", mods: { constitution: 1 }, price: 28, description: "비바람과 작은 상처를 막아 준다." },
+    amberCharm: { name: "호박 부적", icon: "📿", slot: "accessory", label: "장신구", mods: { wisdom: 1 }, price: 26, description: "마음의 중심을 잡아 주는 작은 부적." },
     boarSpear: { name: "뿔멧돼지 사냥창", icon: "🔱", slot: "weapon", label: "무기", mods: { strength: 2 }, price: 45, description: "뿔을 박아 만든 묵직한 사냥창." },
     emberDagger: { name: "잿불 단검", icon: "🗡", slot: "weapon", label: "무기", mods: { agility: 1, intelligence: 1 }, price: 70, description: "불도마뱀 비늘을 벼려 만든 날카로운 칼." },
     spiderSilkVest: { name: "거미줄 조끼", icon: "🥋", slot: "armor", label: "방어구", mods: { agility: 2 }, price: 60, description: "가볍고 질긴 동굴거미 실로 엮었다." },
