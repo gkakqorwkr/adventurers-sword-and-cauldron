@@ -15,10 +15,22 @@
   const choices = { human: "human-1", elf: "elf-1", dwarf: "dwarf-1", beastfolk: "dragon" };
   const generated = {};
   const premiumRandomPool = {
-    human: ["human-1", "human-2", "human-3"].map(id => ({ label:"무작위 생성 · 인간", src:`assets/portraits/random/${id}.png` })),
-    elf: ["elf-1", "elf-2", "elf-3"].map(id => ({ label:"무작위 생성 · 엘프", src:`assets/portraits/random/${id}.png` })),
-    dwarf: ["dwarf-1", "dwarf-2", "dwarf-3"].map(id => ({ label:"무작위 생성 · 드워프", src:`assets/portraits/random/${id}.png` })),
-    beastfolk: catalog.beastfolk.map(option => ({ label:`무작위 생성 · ${option.label}`, src:option.src }))
+    human: [
+      { label:"무작위 생성 · 인간", traits:"갈색 피부 · 검은 곱슬머리 · 푸른 눈", src:"assets/portraits/random/human-1.png" },
+      { label:"무작위 생성 · 인간", traits:"창백한 주근깨 피부 · 백금 장발 · 회색 눈", src:"assets/portraits/random/human-2.png" },
+      { label:"무작위 생성 · 인간", traits:"올리브 피부 · 적갈색 단발 · 녹색 눈", src:"assets/portraits/random/human-3.png" }
+    ],
+    elf: [
+      { label:"무작위 생성 · 엘프", traits:"창백한 피부 · 은발 · 보랏빛 눈 · 길고 넓은 귀", src:"assets/portraits/random/elf-1.png" },
+      { label:"무작위 생성 · 엘프", traits:"올리브 피부 · 흑발 녹색 줄무늬 · 호박색 눈 · 날카로운 귀", src:"assets/portraits/random/elf-2.png" },
+      { label:"무작위 생성 · 엘프", traits:"구릿빛 피부 · 짧은 백발 · 청록색 눈 · 가느다란 귀", src:"assets/portraits/random/elf-3.png" }
+    ],
+    dwarf: [
+      { label:"무작위 생성 · 드워프", traits:"넓은 얼굴 · 큰 둥근 코 · 붉은 땋은 수염 · 푸른 눈", src:"assets/portraits/random/dwarf-1.png" },
+      { label:"무작위 생성 · 드워프", traits:"짙은 피부 · 매부리코 · 은빛 수염 · 호박색 눈", src:"assets/portraits/random/dwarf-2.png" },
+      { label:"무작위 생성 · 드워프", traits:"창백한 피부 · 큰 코 · 금발 수염 · 녹색 눈", src:"assets/portraits/random/dwarf-3.png" }
+    ],
+    beastfolk: catalog.beastfolk.map(option => ({ label:`무작위 생성 · ${option.label}`, traits:"동물 종 · 털색 · 눈색 · 귀 형태", src:option.src }))
   };
   const race = () => document.querySelector(".race-choice.is-selected")?.dataset.race || "human";
   const selected = selectedRace => catalog[selectedRace].find(item => item.id === choices[selectedRace]) || catalog[selectedRace][0];
@@ -56,7 +68,8 @@
     layout.querySelector(".portrait-variants")?.remove();
     layout.dataset.portraitRace = selectedRace;
     const picker = document.createElement("div"); picker.className = "portrait-variants";
-    picker.innerHTML = `<div class="portrait-variant-head"><span>${choices[selectedRace] === "random" ? active(selectedRace).label : "기존 초상화 선택"}</span><button type="button" data-portrait-random>🎲 새 무작위 외형 생성</button></div><div class="portrait-variant-grid">${catalog[selectedRace].map(option => `<button type="button" data-portrait-key="${option.id}" class="${choices[selectedRace] === option.id ? "is-selected" : ""}" title="${option.label}"><img src="${option.src}" alt="${option.label}" /><small>${option.label}</small></button>`).join("")}</div>`;
+    const profile = choices[selectedRace] === "random" ? active(selectedRace) : null;
+    picker.innerHTML = `<div class="portrait-variant-head"><div><span>${profile ? profile.label : "기존 초상화 선택"}</span>${profile ? `<small class="appearance-profile">${profile.traits}</small>` : ""}</div><button type="button" data-portrait-random>🎲 새 무작위 외형 생성</button></div><div class="portrait-variant-grid">${catalog[selectedRace].map(option => `<button type="button" data-portrait-key="${option.id}" class="${choices[selectedRace] === option.id ? "is-selected" : ""}" title="${option.label}"><img src="${option.src}" alt="${option.label}" /><small>${option.label}</small></button>`).join("")}</div>`;
     picker.querySelectorAll("[data-portrait-key]").forEach(button => button.onclick = () => { choices[race()] = button.dataset.portraitKey; delete layout.dataset.portraitRace; renderPicker(layout); apply(layout); });
     picker.querySelector("[data-portrait-random]").onclick = () => { generated[race()] = createPremiumPortrait(race()); choices[race()] = "random"; delete layout.dataset.portraitRace; renderPicker(layout); apply(layout); };
     layout.append(picker); apply(layout);
