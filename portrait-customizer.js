@@ -85,7 +85,13 @@
     return { id:"random", label:`무작위 생성 · ${label}`, src:canvas.toDataURL("image/png") };
   }
   const active = selectedRace => choices[selectedRace] === "random" && generated[selectedRace] ? generated[selectedRace] : selected(selectedRace);
-  const apply = layout => { const image = layout.querySelector(".portrait-overlay"); if (image) image.src = active(race()).src; };
+  const apply = layout => {
+    const image = layout.querySelector(".portrait-overlay");
+    if (!image) return;
+    image.src = active(race()).src;
+    // 투명 배경의 무작위 초상화도 기본 초상화와 같은 시각적 밀도로 보이게 한다.
+    image.classList.toggle("portrait-is-generated", choices[race()] === "random");
+  };
   function renderPicker(layout) {
     const selectedRace = race();
     if (layout.dataset.portraitRace === selectedRace && layout.querySelector(".portrait-variants")) { apply(layout); return; }
