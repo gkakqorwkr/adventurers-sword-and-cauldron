@@ -14,9 +14,16 @@
   };
   const choices = { human: "human-1", elf: "elf-1", dwarf: "dwarf-1", beastfolk: "dragon" };
   const generated = {};
+  const premiumRandomPool = {
+    human: ["human-1", "human-2", "human-3"].map(id => ({ label:"무작위 생성 · 인간", src:`assets/portraits/random/${id}.png` })),
+    elf: ["elf-1", "elf-2", "elf-3"].map(id => ({ label:"무작위 생성 · 엘프", src:`assets/portraits/random/${id}.png` })),
+    dwarf: ["dwarf-1", "dwarf-2", "dwarf-3"].map(id => ({ label:"무작위 생성 · 드워프", src:`assets/portraits/random/${id}.png` })),
+    beastfolk: catalog.beastfolk.map(option => ({ label:`무작위 생성 · ${option.label}`, src:option.src }))
+  };
   const race = () => document.querySelector(".race-choice.is-selected")?.dataset.race || "human";
   const selected = selectedRace => catalog[selectedRace].find(item => item.id === choices[selectedRace]) || catalog[selectedRace][0];
   const random = list => list[Math.floor(Math.random() * list.length)];
+  function createPremiumPortrait(selectedRace) { return { id:"random", ...random(premiumRandomPool[selectedRace]) }; }
   function createGeneratedPortrait(selectedRace) {
     const canvas = document.createElement("canvas"), ctx = canvas.getContext("2d"), scale = 2, unit = value => value * scale;
     canvas.width = unit(64); canvas.height = unit(72); ctx.imageSmoothingEnabled = false;
@@ -51,7 +58,7 @@
     const picker = document.createElement("div"); picker.className = "portrait-variants";
     picker.innerHTML = `<div class="portrait-variant-head"><span>${choices[selectedRace] === "random" ? active(selectedRace).label : "기존 초상화 선택"}</span><button type="button" data-portrait-random>🎲 새 무작위 외형 생성</button></div><div class="portrait-variant-grid">${catalog[selectedRace].map(option => `<button type="button" data-portrait-key="${option.id}" class="${choices[selectedRace] === option.id ? "is-selected" : ""}" title="${option.label}"><img src="${option.src}" alt="${option.label}" /><small>${option.label}</small></button>`).join("")}</div>`;
     picker.querySelectorAll("[data-portrait-key]").forEach(button => button.onclick = () => { choices[race()] = button.dataset.portraitKey; delete layout.dataset.portraitRace; renderPicker(layout); apply(layout); });
-    picker.querySelector("[data-portrait-random]").onclick = () => { generated[race()] = createGeneratedPortrait(race()); choices[race()] = "random"; delete layout.dataset.portraitRace; renderPicker(layout); apply(layout); };
+    picker.querySelector("[data-portrait-random]").onclick = () => { generated[race()] = createPremiumPortrait(race()); choices[race()] = "random"; delete layout.dataset.portraitRace; renderPicker(layout); apply(layout); };
     layout.append(picker); apply(layout);
   }
   function refresh() { document.querySelectorAll(".portrait-layout").forEach(renderPicker); }
