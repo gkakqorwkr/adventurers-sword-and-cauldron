@@ -81,8 +81,10 @@
       previousRender();
       const region = currentRegion(game.player);
       const isCamp = game.scene === "camp";
-      document.body.dataset.region = isCamp ? "camp" : region.id;
-      document.body.style.setProperty("--region-background", isCamp ? "none" : `url('${region.background}')`);
+      const regionClass = isCamp ? "camp" : region.id;
+      document.body.dataset.region = regionClass;
+      ["camp", ...regions.map(row => row.id)].forEach(id => document.body.classList.remove(`region-${id}`));
+      document.body.classList.add(`region-${regionClass}`);
       const location = document.querySelector("#location");
       if (location) location.textContent = isCamp ? "잿불 길드의 야영지" : `${region.name}${game.enemy ? " — 전투" : ""}`;
       const scene = document.querySelector("#scene");

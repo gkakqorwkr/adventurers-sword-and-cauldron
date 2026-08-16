@@ -88,6 +88,21 @@
       game.clamp(); recordStory(npc.name, `${choice[1]} — ${success ? "성공" : "실패"}. ${detail}`); game.log(`${npc.name}과(와) 교류했다. ${detail}`); markGate(); close(); game.render();
     });
   }
+  function openRecipeEncounter() {
+    const p = ensure();
+    const choices = [["지능", "재료의 성질을 함께 분석한다", "intelligence", 13], ["지혜", "불과 향의 균형을 가늠한다", "wisdom", 13], ["카리스마", "시식평으로 조리사의 마음을 연다", "charisma", 14]];
+    open("떠돌이 조리사와의 만남", "RECIPE DISCOVERY", `<article class="progress-card"><p>낡은 솥을 멘 조리사가 ${region().name}의 마물 재료를 손질하고 있다. 당신의 조언을 기다리는 눈치다.</p><div class="progress-choices">${choices.map((choice, index) => `<button type="button" data-recipe-plot="${index}">[${choice[0]} 판정] ${choice[1]}</button>`).join("")}</div></article>`);
+    modal.querySelectorAll("[data-recipe-plot]").forEach(button => button.onclick = () => {
+      const choice = choices[Number(button.dataset.recipePlot)], success = game.check(choice[2], choice[3], "조리사의 실험");
+      p.regionNpcInteractions += 1;
+      let detail;
+      if (success) { detail = grantRecipe(); if (detail.includes("이미 모두")) { p.gold += 10; detail = "새 조리법은 모두 익혔지만, 조리사가 금화 10G를 건넸다."; } p.xp += 6; }
+      else { detail = "불 조절에는 실패했지만, 조리사는 다음에 다시 함께하자고 했다. 경험치 2를 얻었다."; p.xp += 2; }
+      recordStory("떠돌이 조리사", `${choice[1]} — ${success ? "성공" : "실패"}. ${detail}`);
+      game.log(`떠돌이 조리사와 조리법을 나눴다. ${detail}`);
+      markGate(); close(); game.render();
+    });
+  }
   function openMerchant() {
     open("떠돌이 상인", "TRADE EVENT", `<article class="progress-card"><p>수레를 끄는 상인이 장비 꾸러미와 금화 주머니를 내보인다.</p><div class="progress-choices"><button type="button" data-trade>장비를 사고팔기</button><button type="button" data-rumor>다음 길의 소문을 듣기</button><button type="button" data-close>거래하지 않는다</button></div></article>`);
     modal.querySelector("[data-trade]").onclick = () => { close(); window.TRPG_TOWN?.(); };
@@ -120,9 +135,10 @@
     if (roll < .08) return openInn();
     if (roll < .18) { game.log("작은 마을의 장터를 발견했다."); return window.TRPG_TOWN?.(); }
     if (roll < .30) return openMerchant();
-    if (roll < .50) return interactNpc();
-    if (roll < .78) return spawnMonster();
-    if (roll < .92) return walkOn();
+    if (roll < .48) return interactNpc();
+    if (roll < .58) return openRecipeEncounter();
+    if (roll < .82) return spawnMonster();
+    if (roll < .94) return walkOn();
     const supply = ["bitterCap", ...monsters().filter(row => row.region === region().id).map(row => row.dropId)]; const found = supply[Math.floor(Math.random() * supply.length)]; p.inventory.push(found); game.log(`${window.ITEMS[found]?.name || found}을(를) 발견했다.`);
   }
   function boot() {
