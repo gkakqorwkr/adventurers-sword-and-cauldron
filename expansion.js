@@ -42,7 +42,8 @@
     {id:"scout",name:"사일라",role:"엘프 정찰병",text:"활시위를 늦춘 정찰병이 숲 너머를 가리킨다. ‘불도마뱀이 둥지를 옮기고 있어. 사냥꾼을 도울 생각은?’",choices:[{label:"둥지를 피해 달라는 부탁을 들어준다",story:"사일라와 함께 불도마뱀의 둥지를 비켜 갔다.",recipe:"emberSkewer",xp:4},{label:"사냥터 위치를 길드에 알린다",story:"사일라의 사냥터 정보를 길드에 보고했다.",item:"emberTail",xp:5,followup:"hunterTrail"}]},
     {id:"chef",name:"마렉",role:"떠돌이 조리사",text:"검은 솥을 닦던 마렉이 미소 짓는다. ‘마물 고기는 겁먹은 사람보다 용감한 요리사를 좋아하지.’",choices:[{label:"그의 조리 시범을 돕는다",story:"마렉의 솥 옆에서 마물 요리의 기본을 배웠다.",recipe:"spiderFritter",item:"bitterCap"},{label:"내 방식의 레시피를 들려준다",story:"마렉과 서로의 레시피를 교환했다.",recipe:"batJerky",xp:3,followup:"cookoff"}]}
   ];
-  const townStock = () => Object.keys(window.GEAR || {}).filter(id => window.GEAR[id].price).sort(() => Math.random() - .5).slice(0,8);
+  // 보스 고유 장비는 처치 보상으로만 얻는다. 상점은 일반 장비만 취급한다.
+  const townStock = () => Object.keys(window.GEAR || {}).filter(id => window.GEAR[id].price && !window.GEAR[id].unique).sort(() => Math.random() - .5).slice(0,8);
   const worldEvents = [
     {title:"묻힌 보물상자",role:"갈림길의 속삭임",text:"낡은 이정표 아래로 반쯤 묻힌 보물상자가 보인다. 열쇠 구멍은 아직 따뜻하다.",choices:[{label:"표시된 오솔길을 따라간다",story:"이정표의 화살표를 따라 보물길로 들어섰다.",followup:"treasurePath"},{label:"상자를 두고 안전한 길을 택한다",story:"욕심을 누르고 안전한 길을 선택했다.",xp:4}]},
     {title:"사라진 사냥꾼의 발자국",role:"젖은 숲바닥",text:"피 묻은 발자국과 부러진 화살이 이어진다. 누군가 마물에게 쫓기고 있었던 모양이다.",choices:[{label:"발자국을 추적한다",story:"사라진 사냥꾼의 흔적을 추적하기로 했다.",followup:"hunterTrail"},{label:"화살을 챙기고 야영지로 알린다",story:"위험한 흔적을 길드에 알리기로 했다.",gold:12,xp:3}]},
@@ -254,7 +255,9 @@
     const p = ensure();
     const town = towns[p.currentRegionId] || towns.mistwood;
     window.setWorldBackdrop?.(`town-${p.currentRegionId || "mistwood"}`);
-    if (refreshStock || !p.townStock?.length) p.townStock = townStock();
+    // 이전 저장 데이터에 남아 있을 수 있는 고유 장비도 즉시 상점 재고에서 정리한다.
+    p.townStock = (p.townStock || []).filter(id => window.GEAR?.[id]?.price && !window.GEAR[id].unique);
+    if (refreshStock || !p.townStock.length) p.townStock = townStock();
     const stock = p.townStock;
     const owned = [...new Set(p.inventory.filter(id => window.GEAR?.[id]?.price))].filter(id => sellableCount(p,id) > 0);
     open(town.name, `장비 상점 · ${p.gold} G`, `<p class="town-copy">${town.copy}</p><section class="shop-section"><h3>${town.shop}</h3>${stock.map(id=>shopCard(id,"buy")).join("")}</section><section class="shop-section"><h3>내 장비 판매</h3>${owned.length ? owned.map(id=>shopCard(id,"sell")).join("") : `<p class="empty-journal">판매할 여분 장비가 없습니다.<br>착용 중인 장비는 판매 목록에 표시되지 않습니다.</p>`}</section>`);
@@ -263,7 +266,8 @@
   }
   function buyGear(id) {
     const p = ensure(), gear = window.GEAR?.[id];
-    if (!gear || p.gold < gear.price) { game.log("금화가 부족하다."); return openTown(); }
+    if (!gear || gear.unique) { game.log("보스 고유 장비는 상점에서 살 수 없다. 수호자를 쓰러뜨려 획득해야 한다."); return openTown(); }
+    if (p.gold < gear.price) { game.log("금화가 부족하다."); return openTown(); }
     p.gold -= gear.price; p.inventory.push(id);
     game.log(`${gear.name}을(를) ${gear.price} G에 구매했다.`);
     openTown(); game.render();
