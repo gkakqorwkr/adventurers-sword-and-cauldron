@@ -30,7 +30,13 @@
       { label:"무작위 생성 · 드워프", traits:"짙은 피부 · 매부리코 · 은빛 수염 · 호박색 눈", src:"assets/portraits/random/dwarf-2.png" },
       { label:"무작위 생성 · 드워프", traits:"창백한 피부 · 큰 코 · 금발 수염 · 녹색 눈", src:"assets/portraits/random/dwarf-3.png" }
     ],
-    beastfolk: catalog.beastfolk.map(option => ({ label:`무작위 생성 · ${option.label}`, traits:"동물 종 · 털색 · 눈색 · 귀 형태", src:option.src }))
+    beastfolk: [
+      { label:"무작위 생성 · 늑대 수인", traits:"검은 털 · 흰 가슴털 · 얼음빛 눈 · 찢어진 귀", src:"assets/portraits/random/beast-wolf.png" },
+      { label:"무작위 생성 · 은여우 수인", traits:"은백색 털 · 에메랄드 눈 · 짧고 둥근 귀", src:"assets/portraits/random/beast-fox.png" },
+      { label:"무작위 생성 · 고양이 수인", traits:"황갈색 털 · 푸른 눈 · 한쪽 접힌 귀", src:"assets/portraits/random/beast-cat.png" },
+      { label:"무작위 생성 · 토끼 수인", traits:"갈색 털 · 검은 눈 · 긴 롭이어", src:"assets/portraits/random/beast-rabbit.png" },
+      { label:"무작위 생성 · 곰 수인", traits:"크림색 털 · 녹색 눈 · 둥근 귀", src:"assets/portraits/random/beast-bear.png" }
+    ]
   };
   const race = () => document.querySelector(".race-choice.is-selected")?.dataset.race || "human";
   const selected = selectedRace => catalog[selectedRace].find(item => item.id === choices[selectedRace]) || catalog[selectedRace][0];
