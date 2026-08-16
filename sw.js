@@ -1,4 +1,4 @@
-const CACHE = "sword-cauldron-v18";
+const CACHE = "sword-cauldron-v19";
 const ASSETS = ["./", "./index.html", "./styles.css", "./ui-polish.css", "./character-ui.css", "./expansion.css", "./gameplay-fixes.css", "./portrait-customizer.css", "./regional-content.css", "./progression.css", "./app.js", "./start.js", "./character-ui.js", "./expansion.js", "./portrait-assets.js", "./gameplay-fixes.js", "./portrait-customizer.js", "./regional-content.js", "./item-visuals.js", "./progression.js", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
@@ -15,8 +15,9 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-    if (event.request.method === "GET" && new URL(event.request.url).origin === self.location.origin) caches.open(CACHE).then(cache => cache.put(event.request, response.clone()));
+  if (event.request.method !== "GET") return;
+  event.respondWith(fetch(event.request).then(response => {
+    if (new URL(event.request.url).origin === self.location.origin) caches.open(CACHE).then(cache => cache.put(event.request, response.clone()));
     return response;
-  })));
+  }).catch(() => caches.match(event.request)));
 });
