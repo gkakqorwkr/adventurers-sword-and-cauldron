@@ -42,7 +42,10 @@
         { label:"무작위 생성 · 검은 늑대 수인", traits:"검은 털 · 흰 가슴털 · 얼음빛 눈 · 찢어진 귀", src:"assets/portraits/pixel/random-beast-wolf.png" },
         { label:"무작위 생성 · 은빛 늑대 수인", traits:"은회색 털 · 호박색 눈 · 풍성한 갈기 · 푸른 여행 망토", src:"assets/portraits/pixel/random-beast-wolf-2.png" }
       ],
-      fox: [{ label:"무작위 생성 · 은여우 수인", traits:"은백색 털 · 에메랄드 눈 · 짧고 둥근 귀", src:"assets/portraits/pixel/random-beast-fox.png" }],
+      fox: [
+        { label:"무작위 생성 · 은여우 수인", traits:"은백색 털 · 에메랄드 눈 · 곧게 선 귀 · 청록 망토", src:"assets/portraits/pixel/random-beast-fox-2.png" },
+        { label:"무작위 생성 · 붉은 여우 수인", traits:"붉은 털 · 푸른 눈 · 긴 귀 · 푸른 여행 망토", src:"assets/portraits/pixel/beast-fox.png" }
+      ],
       cat: [{ label:"무작위 생성 · 고양이 수인", traits:"황갈색 털 · 푸른 눈 · 한쪽 접힌 귀", src:"assets/portraits/pixel/random-beast-cat.png" }],
       rabbit: [{ label:"무작위 생성 · 토끼 수인", traits:"갈색 털 · 검은 눈 · 긴 롭이어", src:"assets/portraits/pixel/random-beast-rabbit.png" }],
       bear: [{ label:"무작위 생성 · 곰 수인", traits:"크림색 털 · 녹색 눈 · 둥근 귀", src:"assets/portraits/pixel/random-beast-bear.png" }]
