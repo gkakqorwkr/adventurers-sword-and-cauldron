@@ -75,7 +75,7 @@ class CombatSystem {
       const rewards = enemy.drops || [];
       rewards.forEach(id => p.inventory.push(id));
       p.xp += 8;
-      const rewardNames = rewards.map(id => ITEMS[id]?.name || id).join(", ") || "아무것도";
+      const rewardNames = rewards.map(id => ITEMS[id]?.name || window.GEAR?.[id]?.name || id).join(", ") || "아무것도";
       this.game.log(`${enemy.name}을(를) 쓰러뜨렸다. ${rewardNames}을(를) 획득했다.`);
       this.game.enemy = null;
       this.game.scene = "wild";
