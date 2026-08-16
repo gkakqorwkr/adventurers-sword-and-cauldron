@@ -1,4 +1,4 @@
-const CACHE = "sword-cauldron-v24";
+const CACHE = "sword-cauldron-v25";
 const ASSETS = ["./", "./index.html", "./styles.css", "./ui-polish.css", "./character-ui.css", "./expansion.css", "./gameplay-fixes.css", "./portrait-customizer.css", "./regional-content.css", "./progression.css", "./app.js", "./start.js", "./character-ui.js", "./expansion.js", "./portrait-assets.js", "./gameplay-fixes.js", "./portrait-customizer.js", "./regional-content.js", "./item-visuals.js", "./progression.js", "./assets/backgrounds/mistwood.png", "./assets/backgrounds/swamp.png", "./assets/backgrounds/prairie.png", "./assets/backgrounds/mine.png", "./assets/backgrounds/canyon.png", "./assets/towns/mistwood-town.png", "./assets/towns/swamp-town.png", "./assets/towns/prairie-town.png", "./assets/towns/mine-town.png", "./assets/towns/canyon-town.png", "./assets/portraits/beastfolk/wolf.png", "./assets/portraits/beastfolk/fox.png", "./assets/portraits/beastfolk/cat.png", "./assets/portraits/beastfolk/rabbit.png", "./assets/portraits/beastfolk/bear.png", "./assets/foods/r71.png", "./assets/items/i56.png", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
