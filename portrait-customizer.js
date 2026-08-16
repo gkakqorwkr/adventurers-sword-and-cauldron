@@ -1,15 +1,15 @@
 (() => {
   const catalog = {
-    human: [1, 2, 3].map(id => ({ id: `human-${id}`, label: `인간 외형 ${id}`, src: `assets/portraits/variants/human-${id}.png` })),
-    elf: [1, 2, 3].map(id => ({ id: `elf-${id}`, label: `엘프 외형 ${id}`, src: `assets/portraits/variants/elf-${id}.png` })),
-    dwarf: [1, 2, 3].map(id => ({ id: `dwarf-${id}`, label: `드워프 외형 ${id}`, src: `assets/portraits/variants/dwarf-${id}.png` })),
+    human: [1, 2, 3].map(id => ({ id: `human-${id}`, label: `인간 외형 ${id}`, src: `assets/portraits/normalized/human-${id}.png` })),
+    elf: [1, 2, 3].map(id => ({ id: `elf-${id}`, label: `엘프 외형 ${id}`, src: `assets/portraits/normalized/elf-${id}.png` })),
+    dwarf: [1, 2, 3].map(id => ({ id: `dwarf-${id}`, label: `드워프 외형 ${id}`, src: `assets/portraits/normalized/dwarf-${id}.png` })),
     beastfolk: [
-      { id: "dragon", label: "용인", src: "assets/portraits/pixel/dragonkin-1.png" },
-      { id: "wolf", label: "늑대 수인", src: "assets/portraits/pixel/beast-wolf.png" },
-      { id: "fox", label: "여우 수인", src: "assets/portraits/pixel/beast-fox.png" },
-      { id: "cat", label: "고양이 수인", src: "assets/portraits/pixel/beast-cat.png" },
-      { id: "rabbit", label: "토끼 수인", src: "assets/portraits/pixel/beast-rabbit.png" },
-      { id: "bear", label: "곰 수인", src: "assets/portraits/pixel/beast-bear.png" }
+      { id: "dragon", label: "용인", src: "assets/portraits/normalized/dragonkin-1.png" },
+      { id: "wolf", label: "늑대 수인", src: "assets/portraits/normalized/beast-wolf.png" },
+      { id: "fox", label: "여우 수인", src: "assets/portraits/normalized/beast-fox.png" },
+      { id: "cat", label: "고양이 수인", src: "assets/portraits/normalized/beast-cat.png" },
+      { id: "rabbit", label: "토끼 수인", src: "assets/portraits/normalized/beast-rabbit.png" },
+      { id: "bear", label: "곰 수인", src: "assets/portraits/normalized/beast-bear.png" }
     ]
   };
   const choices = { human: "human-1", elf: "elf-1", dwarf: "dwarf-1", beastfolk: "dragon" };
@@ -18,37 +18,37 @@
   let selectedBeastfolk = "dragon";
   const premiumRandomPool = {
     human: [
-      { label:"무작위 생성 · 인간", traits:"갈색 피부 · 검은 곱슬머리 · 푸른 눈", src:"assets/portraits/random/human-1.png" },
-      { label:"무작위 생성 · 인간", traits:"창백한 주근깨 피부 · 백금 장발 · 회색 눈", src:"assets/portraits/random/human-2.png" },
-      { label:"무작위 생성 · 인간", traits:"올리브 피부 · 적갈색 단발 · 녹색 눈", src:"assets/portraits/random/human-3.png" }
+      { label:"무작위 생성 · 인간", traits:"갈색 피부 · 검은 곱슬머리 · 푸른 눈", src:"assets/portraits/normalized/random-human-1.png" },
+      { label:"무작위 생성 · 인간", traits:"창백한 주근깨 피부 · 백금 장발 · 회색 눈", src:"assets/portraits/normalized/random-human-2.png" },
+      { label:"무작위 생성 · 인간", traits:"올리브 피부 · 적갈색 단발 · 녹색 눈", src:"assets/portraits/normalized/random-human-3.png" }
     ],
     elf: [
-      { label:"무작위 생성 · 엘프", traits:"창백한 피부 · 은발 · 보랏빛 눈 · 길고 넓은 귀", src:"assets/portraits/random/elf-1.png" },
-      { label:"무작위 생성 · 엘프", traits:"올리브 피부 · 흑발 녹색 줄무늬 · 호박색 눈 · 날카로운 귀", src:"assets/portraits/random/elf-2.png" },
-      { label:"무작위 생성 · 엘프", traits:"구릿빛 피부 · 짧은 백발 · 청록색 눈 · 가느다란 귀", src:"assets/portraits/random/elf-3.png" }
+      { label:"무작위 생성 · 엘프", traits:"창백한 피부 · 은발 · 보랏빛 눈 · 길고 넓은 귀", src:"assets/portraits/normalized/random-elf-1.png" },
+      { label:"무작위 생성 · 엘프", traits:"올리브 피부 · 흑발 녹색 줄무늬 · 호박색 눈 · 날카로운 귀", src:"assets/portraits/normalized/random-elf-2.png" },
+      { label:"무작위 생성 · 엘프", traits:"구릿빛 피부 · 짧은 백발 · 청록색 눈 · 가느다란 귀", src:"assets/portraits/normalized/random-elf-3.png" }
     ],
     dwarf: [
-      { label:"무작위 생성 · 드워프", traits:"넓은 얼굴 · 큰 둥근 코 · 붉은 땋은 수염 · 푸른 눈", src:"assets/portraits/random/dwarf-1.png" },
-      { label:"무작위 생성 · 드워프", traits:"짙은 피부 · 매부리코 · 은빛 수염 · 호박색 눈", src:"assets/portraits/random/dwarf-2.png" },
-      { label:"무작위 생성 · 드워프", traits:"창백한 피부 · 큰 코 · 금발 수염 · 녹색 눈", src:"assets/portraits/random/dwarf-3.png" }
+      { label:"무작위 생성 · 드워프", traits:"넓은 얼굴 · 큰 둥근 코 · 붉은 땋은 수염 · 푸른 눈", src:"assets/portraits/normalized/random-dwarf-1.png" },
+      { label:"무작위 생성 · 드워프", traits:"짙은 피부 · 매부리코 · 은빛 수염 · 호박색 눈", src:"assets/portraits/normalized/random-dwarf-2.png" },
+      { label:"무작위 생성 · 드워프", traits:"창백한 피부 · 큰 코 · 금발 수염 · 녹색 눈", src:"assets/portraits/normalized/random-dwarf-3.png" }
     ],
     // 수인은 선택한 동물 종류 안에서만 외형이 바뀐다.
     beastfolk: {
       dragon: [
-        { label:"무작위 생성 · 푸른 용인", traits:"푸른 비늘 · 황금 눈 · 굵은 뿔 · 남색 망토", src:"assets/portraits/pixel/dragonkin-2.png" },
-        { label:"무작위 생성 · 숲의 용인", traits:"녹색 비늘 · 청록 눈 · 뒤로 굽은 뿔 · 깃털 장식", src:"assets/portraits/pixel/dragonkin-3.png" }
+        { label:"무작위 생성 · 푸른 용인", traits:"푸른 비늘 · 황금 눈 · 굵은 뿔 · 남색 망토", src:"assets/portraits/normalized/dragonkin-2.png" },
+        { label:"무작위 생성 · 숲의 용인", traits:"녹색 비늘 · 청록 눈 · 뒤로 굽은 뿔 · 깃털 장식", src:"assets/portraits/normalized/dragonkin-3.png" }
       ],
       wolf: [
-        { label:"무작위 생성 · 검은 늑대 수인", traits:"검은 털 · 흰 가슴털 · 얼음빛 눈 · 찢어진 귀", src:"assets/portraits/pixel/random-beast-wolf.png" },
-        { label:"무작위 생성 · 은빛 늑대 수인", traits:"은회색 털 · 호박색 눈 · 풍성한 갈기 · 푸른 여행 망토", src:"assets/portraits/pixel/random-beast-wolf-2.png" }
+        { label:"무작위 생성 · 검은 늑대 수인", traits:"검은 털 · 흰 가슴털 · 얼음빛 눈 · 찢어진 귀", src:"assets/portraits/normalized/random-beast-wolf.png" },
+        { label:"무작위 생성 · 은빛 늑대 수인", traits:"은회색 털 · 호박색 눈 · 풍성한 갈기 · 푸른 여행 망토", src:"assets/portraits/normalized/random-beast-wolf-2.png" }
       ],
       fox: [
-        { label:"무작위 생성 · 은여우 수인", traits:"은백색 털 · 에메랄드 눈 · 곧게 선 귀 · 청록 망토", src:"assets/portraits/pixel/random-beast-fox-2.png" },
-        { label:"무작위 생성 · 붉은 여우 수인", traits:"붉은 털 · 푸른 눈 · 긴 귀 · 푸른 여행 망토", src:"assets/portraits/pixel/beast-fox.png" }
+        { label:"무작위 생성 · 은여우 수인", traits:"은백색 털 · 에메랄드 눈 · 곧게 선 귀 · 청록 망토", src:"assets/portraits/normalized/random-beast-fox-2.png" },
+        { label:"무작위 생성 · 붉은 여우 수인", traits:"붉은 털 · 푸른 눈 · 긴 귀 · 푸른 여행 망토", src:"assets/portraits/normalized/random-beast-fox.png" }
       ],
-      cat: [{ label:"무작위 생성 · 고양이 수인", traits:"황갈색 털 · 푸른 눈 · 한쪽 접힌 귀", src:"assets/portraits/pixel/random-beast-cat.png" }],
-      rabbit: [{ label:"무작위 생성 · 토끼 수인", traits:"갈색 털 · 검은 눈 · 긴 롭이어", src:"assets/portraits/pixel/random-beast-rabbit.png" }],
-      bear: [{ label:"무작위 생성 · 곰 수인", traits:"크림색 털 · 녹색 눈 · 둥근 귀", src:"assets/portraits/pixel/random-beast-bear.png" }]
+      cat: [{ label:"무작위 생성 · 고양이 수인", traits:"황갈색 털 · 푸른 눈 · 한쪽 접힌 귀", src:"assets/portraits/normalized/random-beast-cat.png" }],
+      rabbit: [{ label:"무작위 생성 · 토끼 수인", traits:"갈색 털 · 검은 눈 · 긴 롭이어", src:"assets/portraits/normalized/random-beast-rabbit.png" }],
+      bear: [{ label:"무작위 생성 · 곰 수인", traits:"크림색 털 · 녹색 눈 · 둥근 귀", src:"assets/portraits/normalized/random-beast-bear.png" }]
     }
   };
   const race = () => document.querySelector(".race-choice.is-selected")?.dataset.race || "human";
