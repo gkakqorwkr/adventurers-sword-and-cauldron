@@ -33,12 +33,27 @@
     monsterImage += 1;
     return { id, name, hp, atk, def, dropId, dropName, region: region.id, image: `assets/monsters-v2/m${String(monsterImage).padStart(2, "0")}.png` };
   }));
-  const recipeArt = { wolfJerky: "assets/foods/r71.png" };
-  let recipeImage = 0;
+  // 요리명 순서가 바뀌어도 그림이 뒤섞이지 않도록, 모든 요리는 의미에 맞는 도트를 직접 연결한다.
+  const recipeArt = {
+    mossGelSoup: "assets/foods/r01.png", boarHerbStew: "assets/foods/r24.png", spiderFritter: "assets/foods/r57.png", mothHoneyTea: "assets/foods/r05.png", wolfJerky: "assets/foods/r71.png",
+    goblinRisotto: "assets/foods/r39.png", ravenSkewer: "assets/foods/r03.png", mistwoodPie: "assets/foods/r08.png", forestBroth: "assets/foods/r09.png", shadowSalad: "assets/foods/r10.png",
+    shellBroth: "assets/foods/r11.png", wispOilSoup: "assets/foods/r63.png", fungalGratin: "assets/foods/r06.png", serpentNoodles: "assets/foods/r12.png", mireBiscuit: "assets/foods/r34.png",
+    nectarTart: "assets/foods/r50.png", leechPearlTea: "assets/foods/r44.png", swampCurry: "assets/foods/r07.png", mossRoll: "assets/foods/r21.png", fogHotpot: "assets/foods/r65.png",
+    emberSkewer: "assets/foods/r23.png", ramRoast: "assets/foods/r29.png", hyenaStew: "assets/foods/r41.png", elementalTea: "assets/foods/r52.png", beetleChips: "assets/foods/r57.png",
+    lionManeRoast: "assets/foods/r18.png", scorpionCurry: "assets/foods/r30.png", prairieBarbecue: "assets/foods/r61.png", ashPorridge: "assets/foods/r02.png", lavaStew: "assets/foods/r54.png",
+    mimicToast: "assets/foods/r42.png", crystalTea: "assets/foods/r16.png", marrowRamen: "assets/foods/r09.png", golemBiscuit: "assets/foods/r13.png", batJerky: "assets/foods/r71.png",
+    oilPasta: "assets/foods/r36.png", wormSkewer: "assets/foods/r38.png", minePizza: "assets/foods/r13.png", crystalRisotto: "assets/foods/r39.png", deepPie: "assets/foods/r40.png",
+    drakeCurry: "assets/foods/r25.png", magmaScone: "assets/foods/r26.png", wyvernSoup: "assets/foods/r43.png", trollSteak: "assets/foods/r35.png", eelSkewer: "assets/foods/r69.png",
+    cinderSorbet: "assets/foods/r48.png", harpyPie: "assets/foods/r08.png", volcanoRamen: "assets/foods/r58.png", dragonHotpot: "assets/foods/r24.png", ashBowl: "assets/foods/r66.png",
+    thornStagRoast: "assets/foods/r68.png", whisperFoxTea: "assets/foods/r31.png", barkSapJelly: "assets/foods/r53.png", mistwoodHotpot: "assets/foods/r65.png",
+    crocRoast: "assets/foods/r55.png", sirenPickle: "assets/foods/r56.png", frogLegRoast: "assets/foods/r57.png", swampBouillabaisse: "assets/foods/r43.png",
+    salamanderRoast: "assets/foods/r45.png", vultureSteam: "assets/foods/r60.png", buffaloRibs: "assets/foods/r61.png", prairieGrill: "assets/foods/r62.png",
+    ghostFlameSoup: "assets/foods/r63.png", crystalThreadPasta: "assets/foods/r64.png", moleOreStew: "assets/foods/r65.png", minerLunchbox: "assets/foods/r66.png",
+    basiliskCanape: "assets/foods/r67.png", chimeraSteak: "assets/foods/r68.png", sunScorpionGrill: "assets/foods/r57.png", canyonHotpot: "assets/foods/r70.png"
+  };
   const recipes = regions.flatMap(region => region.recipes.map(spec => {
     const [id, name, need, hunger, hp, effect, stamina = 0] = spec;
-    recipeImage += 1;
-    return { id, name, need, hunger, hp, stamina, effect, region: region.id, image: recipeArt[id] || `assets/foods/r${String(recipeImage).padStart(2, "0")}.png` };
+    return { id, name, need, hunger, hp, stamina, effect, region: region.id, image: recipeArt[id] || "assets/foods/r01.png" };
   }));
   const additions = [
     { region: "mistwood", monsters: [["thornStag", "가시등 사슴", 27, 8, 3, "thornVenison", "가시등 사슴 고기"], ["whisperFox", "속삭임 여우", 20, 9, 2, "foxTail", "속삭임 여우 꼬리"], ["barkTreant", "나무껍질 트렌트", 34, 8, 6, "barkSap", "빛나는 나무 수액"]], recipes: [["thornStagRoast", "가시 사슴 숯불구이", ["thornVenison", "bitterCap"], 26, 8, "포만감 +26 · HP +8"], ["whisperFoxTea", "속삭임 여우 꼬리차", ["foxTail"], 8, 1, "포만감 +8 · 기력 +8", 8], ["barkSapJelly", "나무 수액 젤리", ["barkSap", "mossGel"], 14, 4, "포만감 +14 · HP +4"], ["mistwoodHotpot", "안개숲 사냥 전골", ["wolfLoin", "thornVenison"], 29, 9, "포만감 +29 · HP +9"]] },
@@ -47,11 +62,11 @@
     { region: "mine", monsters: [["lanternWraith", "등불 망령", 30, 13, 2, "ghostFlame", "망령의 푸른 불꽃"], ["crystalSpider", "수정 거미", 32, 12, 5, "crystalThread", "수정 거미 실"], ["tunnelMole", "터널 두더지", 35, 10, 4, "moleMeat", "터널 두더지 고기"]], recipes: [["ghostFlameSoup", "등불 망령 불꽃 수프", ["ghostFlame"], 12, 5, "포만감 +12 · HP +5"], ["crystalThreadPasta", "수정 거미 실 파스타", ["crystalThread"], 24, 7, "포만감 +24 · HP +7"], ["moleOreStew", "두더지 광맥 스튜", ["moleMeat"], 27, 8, "포만감 +27 · HP +8"], ["minerLunchbox", "심층 채굴자 도시락", ["moleMeat", "boneMarrow"], 30, 9, "포만감 +30 · HP +9"]] },
     { region: "canyon", monsters: [["obsidianBasilisk", "흑요석 바실리스크", 43, 14, 6, "basiliskEye", "흑요석 바실리스크 눈"], ["ashChimera", "재빛 키메라", 46, 15, 5, "chimeraMeat", "재빛 키메라 등심"], ["sunScorpion", "태양 전갈", 39, 14, 6, "sunScorpionShell", "태양 전갈 껍질"]], recipes: [["basiliskCanape", "흑요석 바실리스크 눈 카나페", ["basiliskEye"], 16, 6, "포만감 +16 · HP +6"], ["chimeraSteak", "재빛 키메라 스테이크", ["chimeraMeat"], 34, 11, "포만감 +34 · HP +11"], ["sunScorpionGrill", "태양 전갈 껍질 구이", ["sunScorpionShell"], 24, 7, "포만감 +24 · HP +7"], ["canyonHotpot", "협곡 황혼 전골", ["chimeraMeat", "volcanicEel"], 36, 12, "포만감 +36 · HP +12"]] }
   ];
-  let addedMonsterImage = 36, addedRecipeImage = 51;
+  let addedMonsterImage = 36;
   additions.forEach(addition => {
     const region = regions.find(row => row.id === addition.region);
     addition.monsters.forEach(spec => { const [id, name, hp, atk, def, dropId, dropName] = spec; region.monsters.push(spec); monsters.push({ id, name, hp, atk, def, dropId, dropName, region: region.id, image: `assets/monsters-v3/m${String(addedMonsterImage++).padStart(2, "0")}.png` }); });
-    addition.recipes.forEach(spec => { const [id, name, need, hunger, hp, effect, stamina = 0] = spec; region.recipes.push(spec); recipes.push({ id, name, need, hunger, hp, stamina, effect, region: region.id, image: `assets/foods/r${String(addedRecipeImage++).padStart(2, "0")}.png` }); });
+    addition.recipes.forEach(spec => { const [id, name, need, hunger, hp, effect, stamina = 0] = spec; region.recipes.push(spec); recipes.push({ id, name, need, hunger, hp, stamina, effect, region: region.id, image: recipeArt[id] || "assets/foods/r01.png" }); });
   });
   const escape = value => String(value).replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[char]);
 
@@ -75,7 +90,7 @@
     body.innerHTML = `<p class="regional-intro">마물은 조우해야, 요리는 재료를 정확히 섞어야 기록됩니다. 미발견 항목은 모습을 드러내지 않습니다.</p>${regions.map(section).join("")}`; ui.modal.classList.add("open");
   }
   function boot() {
-    const game = window.game; if (!game || !window.ITEMS) return setTimeout(boot, 50); addIngredients(); window.REGIONAL_RECIPES = recipes; window.REGIONAL_MONSTERS = monsters; window.REGIONS = regions; ensure(game.player); game.player.currentRegionId ||= "mistwood";
+    const game = window.game; if (!game || !window.ITEMS) return setTimeout(boot, 50); addIngredients(); window.applyItemVisuals?.(); window.REGIONAL_RECIPES = recipes; window.REGIONAL_MONSTERS = monsters; window.REGIONS = regions; ensure(game.player); game.player.currentRegionId ||= "mistwood";
     const ui = makeModal(); const previousRender = game.render.bind(game);
     function setRegionBackdrop(regionClass) {
       document.body.dataset.region = regionClass;
