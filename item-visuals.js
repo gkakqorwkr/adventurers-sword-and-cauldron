@@ -10,7 +10,8 @@
     "fieldKnife", "ironPot", "slimeGel", "bitterCap", "boarMeat", "emberTail", "spiderLeg", "mossShell", "boarHorn", "emberScale",
     "venomSac", "swampMoss", "batWing", "frostFang", "blackMane", "charcoalClaw", "crystalShard", "venison", "mimicTooth", "mimicLock",
     "drakeScale", "dragonGland", "mothDust", "moonWing", "golemCore", "clayChunk", "wolfLoin", "goblinHerb", "ravenWing", "wispOil",
-    "fungalCap", "serpentFillet", "mireCore", "nectarPod", "leechPearl", "ramRib", "cinderMeat", "emberHeart", "beetleShell", "scorpionClaw"
+    "fungalCap", "serpentFillet", "mireCore", "nectarPod", "leechPearl", "ramRib", "cinderMeat", "emberHeart", "beetleShell", "scorpionClaw",
+    "thornVenison", "foxTail", "barkSap", "crocMeat", "sirenScale", "frogLeg", "salamanderMeat", "vultureWing", "buffaloRib", "ghostFlame", "crystalThread", "moleMeat", "basiliskEye", "chimeraMeat", "sunScorpionShell"
   ];
   const relatedItemArt = { boneMarrow: 25, rustOil: 30, wormMeat: 27, magmaCore: 25, wyvernWing: 24, trollMeat: 37, volcanicEel: 32, cinderEssence: 38, harpyFeather: 29 };
   const sprite = (folder, index, label) => `<img class="item-visual__sprite" src="assets/${folder}/${folder === "equipment" ? "g" : "i"}${String(index).padStart(2, "0")}.png" alt="${label}" />`;

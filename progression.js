@@ -52,7 +52,7 @@
     const here = region();
     open("길목의 주술사", "TURNING POINT", `<article class="progress-card"><p>낡은 가면을 쓴 주술사가 ${here.name}의 경계를 가리킨다.</p><h3>“길은 수호자의 피를 기억한다.”</h3><p>이 지역의 보스급 수호자를 쓰러뜨리면 다음 지역을 선택할 수 있다.</p><button type="button" data-boss>수호자에게 도전한다</button><button type="button" data-close>아직 준비가 필요하다</button></article>`);
     modal.querySelector("[data-boss]").onclick = () => { close(); spawnBoss(); game.render(); };
-    modal.querySelector("[data-close]").onclick = close;
+    modal.querySelector("[data-close]").onclick = () => { resetCycle("주술사는 당신의 준비가 아직 부족하다며 안개 속으로 사라졌다."); close(); game.render(); };
   }
   function resetCycle(note) { const p = ensure(); p.regionBattles = 0; p.regionNpcInteractions = 0; p.regionGateState = "exploring"; game.log(note); }
   function openRoutes(source = "수호자의 흔적") {
@@ -72,7 +72,7 @@
         if (choice[4] === "gold") { const gold = 12 + Math.floor(Math.random() * 14); p.gold += gold; detail = `금화 ${gold}G를 받았다.`; }
         else if (choice[4] === "recipe") detail = grantRecipe();
         else if (choice[4] === "supply") { const supplies = monsters().filter(row => row.region === region().id); const found = supplies[Math.floor(Math.random() * supplies.length)].dropId; p.inventory.push(found); detail = `${window.ITEMS[found]?.name || found}을(를) 받았다.`; }
-        else { const drop = gearDrops(index, Math.random() < .45); if (drop.length) { p.inventory.push(...drop); detail = `${window.GEAR[drop[0]].name}을(를) 받았다.`; } else { p.gold += 15; detail = "금화 15G를 받았다."; } }
+        else { const drop = gearDrops(index, Math.random() < .45); if (drop.length) { p.inventory.push(...drop); detail = `${window.GEAR[drop[0]].name}을(를) 받았다.`; } else { p.gold += 15; detail = "금화 15G를 받았다."; } queueFollowup(); }
         p.xp += 6;
       } else { p.xp += 2; detail = "도움에는 실패했지만 경험치 2를 얻었다."; }
       game.clamp(); recordStory(npc.name, `${choice[1]} — ${success ? "성공" : "실패"}. ${detail}`); game.log(`${npc.name}과(와) 교류했다. ${detail}`); markGate(); close(); game.render();
@@ -84,15 +84,35 @@
     modal.querySelector("[data-rumor]").onclick = () => { game.player.xp += 3; game.log("상인이 수호자와 다음 길에 관한 소문을 들려줬다. 경험치 3 획득."); close(); game.render(); };
     modal.querySelector("[data-close]").onclick = close;
   }
+  function walkOn() {
+    const lines = ["바람에 흔들리는 나뭇잎 소리만 들리는 길을 한참 걸었다.", "비가 그친 흙길에 낯선 발자국이 남아 있었지만, 끝내 누구도 만나지 못했다.", "멀리서 종소리가 들렸지만 길은 조용했고, 당신은 발걸음을 이어갔다.", "해가 기울어 갈 무렵, 아무 일 없이 다음 이정표를 지나쳤다."];
+    const detail = lines[Math.floor(Math.random() * lines.length)]; recordStory("고요한 여정", detail); game.log(detail);
+  }
+  function openInn() {
+    const p = ensure();
+    open("길목의 작은 여관", "RARE REST EVENT", `<article class="progress-card"><p>따뜻한 수프 냄새가 새어 나오는 작은 여관을 발견했다. 하룻밤을 묵으며 식사까지 해결할 수 있다.</p><div class="progress-choices"><button type="button" data-inn>8G로 휴식과 식사</button><button type="button" data-close>지금은 길을 재촉한다</button></div></article>`);
+    modal.querySelector("[data-inn]").onclick = () => { if (p.gold < 8) { game.log("여관비가 부족해 따뜻한 물만 얻어 마셨다."); p.stamina += 3; } else { p.gold -= 8; p.hp += 14; p.stamina += 12; p.hunger += 32; game.log("여관에서 푹 쉬고 따뜻한 식사를 했다."); } game.clamp(); recordStory("길목의 작은 여관", "잠시 쉬며 몸과 허기를 돌봤다."); close(); game.render(); };
+    modal.querySelector("[data-close]").onclick = close;
+  }
+  function queueFollowup() { const p = ensure(); p.regionalFollowups ||= []; p.regionalFollowups.push({ regionId: region().id }); game.log("작은 도움의 여파가 훗날 다시 돌아올지도 모른다."); }
+  function resolveFollowup() {
+    const p = ensure(), event = p.regionalFollowups.shift(), here = window.REGIONS.find(row => row.id === event.regionId) || region(); let title, detail, reward;
+    if (here.id === "prairie") { title = "샐러맨더 둥지의 답례"; if (Math.random() < .5) { window.ITEMS.fireOrb ||= { id:"fireOrb", name:"불의 보주", type:"ingredient", icon:window.ITEMS.emberHeart?.icon, tags:["화염","마력"], toxicity:0 }; p.inventory.push("fireOrb"); detail = "지나쳤던 샐러맨더의 어미가 불의 보주를 발치에 놓고 사라졌다."; reward = "불의 보주를 얻었다."; } else { detail = "샐러맨더의 어미는 당신을 잠시 바라보다가 조용히 길을 비켜 주었다."; p.xp += 8; reward = "경험치 8을 얻었다."; } }
+    else { title = "도움의 여파"; if (Math.random() < .5) { p.gold += 18; detail = `${here.name}에서 도왔던 여행자가 다시 나타나 금화 주머니를 건넸다.`; reward = "금화 18G를 얻었다."; } else { const found = monsters().find(row => row.region === here.id); p.inventory.push(found.dropId); detail = `${here.name}에서 만났던 이가 희귀한 마물 재료를 답례로 보냈다.`; reward = `${window.ITEMS[found.dropId]?.name || found.dropId}을(를) 얻었다.`; } }
+    recordStory(title, detail); game.log(`${detail} ${reward}`); open(title, "FOLLOW-UP STORY", `<article class="progress-card"><p>${detail}</p><p>${reward}</p><button type="button" data-close>여정을 계속한다</button></article>`); modal.querySelector("[data-close]").onclick = () => { close(); game.render(); };
+  }
   function explore() {
     const p = ensure(); if (game.enemy) return; game.advanceTurn(); p.stamina -= 2; p.hunger -= 5; game.clamp(); if (!p.hp) return game.defeat();
     if (p.regionGateState === "shaman") return openShaman();
+    if (p.regionalFollowups?.length) return resolveFollowup();
     const roll = Math.random();
     if (roll < .03) return openRoutes("길 잃은 요정들의 안내");
-    if (roll < .15) { game.log("작은 마을의 장터를 발견했다."); return window.TRPG_TOWN?.(); }
-    if (roll < .28) return openMerchant();
-    if (roll < .53) return interactNpc();
-    if (roll < .93) return spawnMonster();
+    if (roll < .08) return openInn();
+    if (roll < .18) { game.log("작은 마을의 장터를 발견했다."); return window.TRPG_TOWN?.(); }
+    if (roll < .30) return openMerchant();
+    if (roll < .50) return interactNpc();
+    if (roll < .78) return spawnMonster();
+    if (roll < .92) return walkOn();
     const supply = ["bitterCap", ...monsters().filter(row => row.region === region().id).map(row => row.dropId)]; const found = supply[Math.floor(Math.random() * supply.length)]; p.inventory.push(found); game.log(`${window.ITEMS[found]?.name || found}을(를) 발견했다.`);
   }
   function boot() {
