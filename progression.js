@@ -1,16 +1,28 @@
 (() => {
   const bossData = {
-    mistwood: ["안개숲의 뿔왕", "hornBoar", 3, 6, 3],
-    swamp: ["고목 늪의 균사 여왕", "fungusSovereign", 3, 6, 3],
-    prairie: ["잿불 갈기왕", "charcoalLion", 3, 6, 3],
-    mine: ["광맥의 철거인", "oreGolem", 3, 6, 3],
-    canyon: ["용암 심장룡", "youngDragon", 3, 7, 4]
+    mistwood: ["안개숲의 뿔왕", "hornBoar", 3, 6, 3, "hornKingSpear"],
+    swamp: ["고목 늪의 균사 여왕", "fungusSovereign", 3, 6, 3, "myceliumCrown"],
+    prairie: ["잿불 갈기왕", "charcoalLion", 3, 6, 3, "emberManeBlade"],
+    mine: ["광맥의 철거인", "oreGolem", 3, 6, 3, "deepcoreStaff"],
+    canyon: ["용암 심장룡", "youngDragon", 3, 7, 4, "lavaHeartAegis"]
   };
   const npcLines = [
     { name: "길 잃은 정찰병", text: "낡은 지도를 펼쳐 길을 묻는다.", choices: [["지능", "지도 읽기를 돕는다", "intelligence", 13, "gold"], ["지혜", "안전한 쉼터를 알려 준다", "wisdom", 12, "recipe"], ["민첩", "경계를 나눠 맡는다", "agility", 14, "gear"]] },
     { name: "재료 수집가", text: "마물 부산물의 향을 맡고 조리법을 궁금해한다.", choices: [["카리스마", "값을 흥정한다", "charisma", 13, "gold"], ["지능", "재료 정보를 나눈다", "intelligence", 14, "recipe"], ["민첩", "함께 채집한다", "agility", 12, "supply"]] },
     { name: "상처 입은 길드원", text: "다음 길목의 위험을 경고한다.", choices: [["건강", "응급 처치를 돕는다", "constitution", 12, "gold"], ["지혜", "경고를 자세히 듣는다", "wisdom", 14, "recipe"], ["힘", "호위를 제안한다", "strength", 14, "gear"]] },
-    { name: "떠돌이 조리사 마렉", text: "검은 솥을 닦으며 마물 부산물의 조합을 시험하고 있다.", choices: [["지능", "재료의 반응을 함께 분석한다", "intelligence", 13, "recipe"], ["카리스마", "맛을 설득력 있게 평한다", "charisma", 13, "gold"], ["지혜", "불꽃의 세기를 가늠한다", "wisdom", 14, "recipe"]] }
+    { traveler:true, name: "떠돌이 조리사 마렉", portrait:"assets/portraits/variants/human-1.png", affinity:true, text: "검은 솥을 닦으며 마물 부산물의 조합을 시험하고 있다.", choices: [["지능", "재료의 반응을 함께 분석한다", "intelligence", 13, "recipe"], ["카리스마", "맛을 설득력 있게 평한다", "charisma", 13, "gold"], ["지혜", "불꽃의 세기를 가늠한다", "wisdom", 14, "recipe"]] },
+    { region:"mistwood", name:"엘린 이끼 약초꾼", portrait:"assets/portraits/variants/elf-2.png", affinity:true, text:"안개에 젖은 약초를 말리며 독성의 변화를 기록한다.", choices:[["지능","안개 약초의 성질을 분석한다","intelligence",13,"recipe"],["지혜","안전한 채집터를 찾아 준다","wisdom",12,"supply"],["카리스마","길드에 약초꾼을 소개하겠다고 약속한다","charisma",14,"gold"]] },
+    { region:"mistwood", name:"토르안 길목 수호자", portrait:"assets/portraits/variants/dwarf-2.png", affinity:true, text:"쓰러진 표지석을 붙들고 길 잃은 아이를 찾고 있다.", choices:[["힘","표지석을 함께 세운다","strength",12,"gear"],["민첩","안개 속 흔적을 빠르게 추적한다","agility",14,"gold"],["건강","끝까지 수색을 돕는다","constitution",13,"supply"]] },
+    { region:"swamp", name:"네르 갈대 의술사", portrait:"assets/portraits/variants/human-2.png", affinity:true, text:"물에 잠긴 약병을 건져 올리며 치료법을 시험한다.", choices:[["지능","약병의 성분을 분류한다","intelligence",14,"recipe"],["건강","독성 있는 뿌리를 견딘다","constitution",13,"gold"],["지혜","늪의 물길을 읽어 약초를 찾는다","wisdom",12,"supply"]] },
+    { region:"swamp", name:"바렌 늪배 사공", portrait:"assets/portraits/variants/dwarf-3.png", text:"기울어진 배 위에서 사라진 화물을 찾고 있다.", choices:[["민첩","갈대 사이로 밧줄을 건넨다","agility",13,"gear"],["카리스마","화주를 달래 운임을 받는다","charisma",13,"gold"],["힘","빠진 화물을 끌어올린다","strength",12,"supply"]] },
+    { region:"prairie", name:"릴라 재목동", portrait:"assets/portraits/variants/human-3.png", affinity:true, text:"잿불 양 떼가 겁을 먹고 흩어져 있다.", choices:[["카리스마","피리 소리로 양 떼를 달랜다","charisma",12,"gold"],["민첩","흩어진 양을 빠르게 몰아넣는다","agility",14,"gear"],["지혜","바람을 읽고 안전한 목초지를 찾는다","wisdom",13,"recipe"]] },
+    { region:"prairie", name:"코르 화염 사육사", portrait:"assets/portraits/variants/dragonkin-2.png", text:"불도마뱀 둥지 근처에서 알을 지키고 있다.", choices:[["지능","알의 온도를 조절한다","intelligence",14,"recipe"],["건강","뜨거운 모래를 견디며 둥지를 정돈한다","constitution",13,"supply"],["힘","무너진 돌무더기를 옮긴다","strength",13,"gear"]] },
+    { region:"mine", name:"브롬 광맥 측량사", portrait:"assets/portraits/variants/dwarf-1.png", affinity:true, text:"수정 광맥의 균열을 앞에 두고 지도를 펼쳤다.", choices:[["지능","룬이 새긴 균열을 해독한다","intelligence",14,"gear"],["지혜","광맥의 울림으로 안전한 길을 고른다","wisdom",13,"recipe"],["힘","막힌 갱도를 넓힌다","strength",14,"gold"]] },
+    { region:"mine", name:"세라 룬 해독사", portrait:"assets/portraits/variants/elf-3.png", text:"빛나는 석판의 문장을 조용히 베껴 쓰고 있다.", choices:[["지능","잊힌 룬을 함께 번역한다","intelligence",12,"recipe"],["카리스마","후원자를 설득해 보상을 받는다","charisma",14,"gold"],["민첩","무너지는 석판을 먼저 받친다","agility",14,"gear"]] },
+    { region:"canyon", name:"이아 불꽃 전령", portrait:"assets/portraits/variants/dragonkin-3.png", affinity:true, text:"불길한 붉은 연기를 보고 봉화대를 고치고 있다.", choices:[["지혜","연기의 방향으로 위험을 읽는다","wisdom",13,"recipe"],["건강","열기를 견디며 봉화를 세운다","constitution",14,"gear"],["카리스마","협곡 부족에게 경고를 전달한다","charisma",13,"gold"]] },
+    { region:"canyon", name:"카드린 협곡 대장장이", portrait:"assets/portraits/variants/dwarf-2.png", text:"식은 용암 철을 두드리며 좋은 광석을 찾고 있다.", choices:[["힘","모루를 함께 두드린다","strength",13,"gear"],["지능","금속의 결을 분석한다","intelligence",14,"recipe"],["민첩","불똥을 피해 담금질한다","agility",13,"supply"]] },
+    { traveler:true, name:"수레꾼 도렌", portrait:"assets/portraits/variants/dwarf-3.png", text:"먼 길을 가는 수레의 바퀴가 진흙에 빠졌다.", choices:[["힘","수레를 밀어 올린다","strength",12,"gear"],["카리스마","다른 여행자에게 도움을 청한다","charisma",13,"gold"],["건강","짐을 나르며 길을 낸다","constitution",13,"supply"]] },
+    { traveler:true, name:"별노래 리라", portrait:"assets/portraits/variants/elf-1.png", affinity:true, text:"모닥불 곁에서 다음 지역의 전설을 노래하고 있다.", choices:[["카리스마","노래에 화음을 보탠다","charisma",12,"gold"],["지혜","전설 속 경고를 새겨 듣는다","wisdom",13,"recipe"],["민첩","사라진 악보 조각을 찾아온다","agility",14,"gear"]] }
   ];
   let game, modal;
   const esc = value => String(value).replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" })[char]);
@@ -22,6 +34,7 @@
     p.regionBattles ||= 0;
     p.regionNpcInteractions ||= 0;
     p.regionGateState ||= "exploring";
+    p.npcAffection ||= {};
     return p;
   }
   function open(title, kicker, body) { modal.querySelector("h2").textContent = title; modal.querySelector("header p").textContent = kicker; modal.querySelector(".progress-modal__body").innerHTML = body; modal.classList.add("open"); }
@@ -54,8 +67,8 @@
     game.log(`${here.name}에서 ${monster.name}이(가) 나타났다. ${ingredients.length ? `${monster.dropName}을(를) 노려볼 수 있다.` : "이번에는 조리 재료를 지니고 있지 않은 듯하다."}`);
   }
   function spawnBoss() {
-    const p = ensure(), here = region(), [name, baseId, hpMult, atkBonus, defBonus] = bossData[here.id], base = monsters().find(row => row.id === baseId), index = window.REGIONS.indexOf(here);
-    game.enemy = { name, hp: base.hp * hpMult, maxHp: base.hp * hpMult, atk: base.atk + atkBonus, def: base.def + defBonus, drops: [...ingredientDrop(base), ...gearDrops(index, true)], image: base.image, regionalBoss: true, regionId: here.id };
+    const p = ensure(), here = region(), [name, baseId, hpMult, atkBonus, defBonus, uniqueGear] = bossData[here.id], base = monsters().find(row => row.id === baseId), index = window.REGIONS.indexOf(here);
+    game.enemy = { name, hp: base.hp * hpMult, maxHp: base.hp * hpMult, atk: base.atk + atkBonus, def: base.def + defBonus, drops: [...ingredientDrop(base), uniqueGear, ...gearDrops(index, true)], image: base.image, regionalBoss: true, regionId: here.id };
     game.scene = "combat"; p.regionGateState = "boss"; game.log(`${name}이(가) 주술사의 부름에 응답했다. 다음 길을 열려면 쓰러뜨려야 한다.`);
   }
   function openShaman() {
@@ -72,8 +85,10 @@
     modal.querySelector("[data-stay]").onclick = () => { resetCycle(`${here.name}에 더 머물기로 했다. 수호자가 다시 당신의 행적을 지켜볼 것이다.`); close(); game.render(); };
   }
   function interactNpc() {
-    const p = ensure(), npc = npcLines[Math.floor(Math.random() * npcLines.length)];
-    open(`${npc.name}과의 만남`, "NPC INTERACTION", `<article class="progress-card"><p>${npc.text}</p><div class="progress-choices">${npc.choices.map((choice, index) => `<button type="button" data-npc="${index}">[${choice[0]} 판정] ${choice[1]}</button>`).join("")}</div></article>`);
+    const p = ensure(), local = npcLines.filter(entry => entry.region === region().id || entry.traveler), pool = local.length ? local : npcLines, npc = pool[Math.floor(Math.random() * pool.length)], affection = p.npcAffection[npc.name] || 0, rank = affection >= 80 ? "친밀" : affection >= 50 ? "신뢰" : affection >= 20 ? "호의" : "낯섦";
+    const portrait = npc.portrait ? `<img class="npc-portrait" src="${npc.portrait}" alt="${esc(npc.name)} 초상화">` : "";
+    const bond = npc.affinity ? `<p class="npc-affection">♥ 호감도 ${affection}/100 · ${rank}</p>` : "";
+    open(`${npc.name}과의 만남`, "NPC INTERACTION", `<article class="progress-card"><div class="npc-intro">${portrait}<div><p>${npc.text}</p>${bond}</div></div><div class="progress-choices">${npc.choices.map((choice, index) => `<button type="button" data-npc="${index}">[${choice[0]} 판정] ${choice[1]}</button>`).join("")}</div></article>`);
     modal.querySelectorAll("[data-npc]").forEach(button => button.onclick = () => {
       const choice = npc.choices[Number(button.dataset.npc)], success = game.check(choice[2], choice[3], `${npc.name}의 부탁`);
       p.regionNpcInteractions += 1; let detail;
@@ -83,6 +98,7 @@
         else if (choice[4] === "recipe") detail = grantRecipe();
         else if (choice[4] === "supply") { const supplies = monsters().filter(row => row.region === region().id); const found = supplies[Math.floor(Math.random() * supplies.length)].dropId; p.inventory.push(found); detail = `${window.ITEMS[found]?.name || found}을(를) 받았다.`; }
         else { const drop = gearDrops(index, Math.random() < .45); if (drop.length) { p.inventory.push(...drop); detail = `${window.GEAR[drop[0]].name}을(를) 받았다.`; } else { p.gold += 15; detail = "금화 15G를 받았다."; } queueFollowup(); }
+        if (npc.affinity) { const gain = 7 + Math.floor(Math.random() * 4); p.npcAffection[npc.name] = Math.min(100, affection + gain); detail += ` 호감도 +${gain} (${p.npcAffection[npc.name]}/100).`; }
         p.xp += 6;
       } else { p.xp += 2; detail = "도움에는 실패했지만 경험치 2를 얻었다."; }
       game.clamp(); recordStory(npc.name, `${choice[1]} — ${success ? "성공" : "실패"}. ${detail}`); game.log(`${npc.name}과(와) 교류했다. ${detail}`); markGate(); close(); game.render();

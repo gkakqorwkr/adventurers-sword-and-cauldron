@@ -77,14 +77,19 @@
   function boot() {
     const game = window.game; if (!game || !window.ITEMS) return setTimeout(boot, 50); addIngredients(); window.REGIONAL_RECIPES = recipes; window.REGIONAL_MONSTERS = monsters; window.REGIONS = regions; ensure(game.player); game.player.currentRegionId ||= "mistwood";
     const ui = makeModal(); const previousRender = game.render.bind(game);
+    function setRegionBackdrop(regionClass) {
+      document.body.dataset.region = regionClass;
+      ["camp", ...regions.map(row => row.id), ...regions.map(row => `town-${row.id}`)].forEach(id => document.body.classList.remove(`region-${id}`));
+      document.body.classList.add(`region-${regionClass}`);
+    }
+    window.setWorldBackdrop = setRegionBackdrop;
+    window.restoreWorldBackdrop = () => setRegionBackdrop(game.scene === "camp" ? "camp" : currentRegion(game.player).id);
     game.render = () => {
       previousRender();
       const region = currentRegion(game.player);
       const isCamp = game.scene === "camp";
       const regionClass = isCamp ? "camp" : region.id;
-      document.body.dataset.region = regionClass;
-      ["camp", ...regions.map(row => row.id)].forEach(id => document.body.classList.remove(`region-${id}`));
-      document.body.classList.add(`region-${regionClass}`);
+      setRegionBackdrop(regionClass);
       const location = document.querySelector("#location");
       if (location) location.textContent = isCamp ? "잿불 길드의 야영지" : `${region.name}${game.enemy ? " — 전투" : ""}`;
       const scene = document.querySelector("#scene");
