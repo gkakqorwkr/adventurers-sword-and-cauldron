@@ -14,6 +14,8 @@
   };
   const choices = { human: "human-1", elf: "elf-1", dwarf: "dwarf-1", beastfolk: "dragon" };
   const generated = {};
+  // 무작위 선택 뒤에도 어떤 수인 계열을 고른 상태였는지 유지한다.
+  let selectedBeastfolk = "dragon";
   const premiumRandomPool = {
     human: [
       { label:"무작위 생성 · 인간", traits:"갈색 피부 · 검은 곱슬머리 · 푸른 눈", src:"assets/portraits/random/human-1.png" },
@@ -30,18 +32,31 @@
       { label:"무작위 생성 · 드워프", traits:"짙은 피부 · 매부리코 · 은빛 수염 · 호박색 눈", src:"assets/portraits/random/dwarf-2.png" },
       { label:"무작위 생성 · 드워프", traits:"창백한 피부 · 큰 코 · 금발 수염 · 녹색 눈", src:"assets/portraits/random/dwarf-3.png" }
     ],
-    beastfolk: [
-      { label:"무작위 생성 · 늑대 수인", traits:"검은 털 · 흰 가슴털 · 얼음빛 눈 · 찢어진 귀", src:"assets/portraits/random/beast-wolf.png" },
-      { label:"무작위 생성 · 은여우 수인", traits:"은백색 털 · 에메랄드 눈 · 짧고 둥근 귀", src:"assets/portraits/random/beast-fox.png" },
-      { label:"무작위 생성 · 고양이 수인", traits:"황갈색 털 · 푸른 눈 · 한쪽 접힌 귀", src:"assets/portraits/random/beast-cat.png" },
-      { label:"무작위 생성 · 토끼 수인", traits:"갈색 털 · 검은 눈 · 긴 롭이어", src:"assets/portraits/random/beast-rabbit.png" },
-      { label:"무작위 생성 · 곰 수인", traits:"크림색 털 · 녹색 눈 · 둥근 귀", src:"assets/portraits/random/beast-bear.png" }
-    ]
+    // 수인은 선택한 동물 종류 안에서만 외형이 바뀐다.
+    beastfolk: {
+      dragon: [
+        { label:"무작위 생성 · 푸른 용인", traits:"푸른 비늘 · 황금 눈 · 굵은 뿔 · 남색 망토", src:"assets/portraits/variants/dragonkin-2.png" },
+        { label:"무작위 생성 · 숲의 용인", traits:"녹색 비늘 · 청록 눈 · 뒤로 굽은 뿔 · 깃털 장식", src:"assets/portraits/variants/dragonkin-3.png" }
+      ],
+      wolf: [
+        { label:"무작위 생성 · 검은 늑대 수인", traits:"검은 털 · 흰 가슴털 · 얼음빛 눈 · 찢어진 귀", src:"assets/portraits/random/beast-wolf.png" },
+        { label:"무작위 생성 · 은빛 늑대 수인", traits:"은회색 털 · 호박색 눈 · 풍성한 갈기 · 푸른 여행 망토", src:"assets/portraits/random/beast-wolf-2.png" }
+      ],
+      fox: [{ label:"무작위 생성 · 은여우 수인", traits:"은백색 털 · 에메랄드 눈 · 짧고 둥근 귀", src:"assets/portraits/random/beast-fox.png" }],
+      cat: [{ label:"무작위 생성 · 고양이 수인", traits:"황갈색 털 · 푸른 눈 · 한쪽 접힌 귀", src:"assets/portraits/random/beast-cat.png" }],
+      rabbit: [{ label:"무작위 생성 · 토끼 수인", traits:"갈색 털 · 검은 눈 · 긴 롭이어", src:"assets/portraits/random/beast-rabbit.png" }],
+      bear: [{ label:"무작위 생성 · 곰 수인", traits:"크림색 털 · 녹색 눈 · 둥근 귀", src:"assets/portraits/random/beast-bear.png" }]
+    }
   };
   const race = () => document.querySelector(".race-choice.is-selected")?.dataset.race || "human";
   const selected = selectedRace => catalog[selectedRace].find(item => item.id === choices[selectedRace]) || catalog[selectedRace][0];
   const random = list => list[Math.floor(Math.random() * list.length)];
-  function createPremiumPortrait(selectedRace) { return { id:"random", ...random(premiumRandomPool[selectedRace]) }; }
+  function createPremiumPortrait(selectedRace) {
+    const pool = selectedRace === "beastfolk" ? premiumRandomPool.beastfolk[selectedBeastfolk] || premiumRandomPool.beastfolk.dragon : premiumRandomPool[selectedRace];
+    const previous = generated[selectedRace]?.src;
+    const alternatives = pool.filter(option => option.src !== previous);
+    return { id:"random", ...random(alternatives.length ? alternatives : pool) };
+  }
   function createGeneratedPortrait(selectedRace) {
     const canvas = document.createElement("canvas"), ctx = canvas.getContext("2d"), scale = 2, unit = value => value * scale;
     canvas.width = unit(64); canvas.height = unit(72); ctx.imageSmoothingEnabled = false;
@@ -76,7 +91,7 @@
     const picker = document.createElement("div"); picker.className = "portrait-variants";
     const profile = choices[selectedRace] === "random" ? active(selectedRace) : null;
     picker.innerHTML = `<div class="portrait-variant-head"><div><span>${profile ? profile.label : "기존 초상화 선택"}</span>${profile ? `<small class="appearance-profile">${profile.traits}</small>` : ""}</div><button type="button" data-portrait-random>🎲 새 무작위 외형 생성</button></div><div class="portrait-variant-grid">${catalog[selectedRace].map(option => `<button type="button" data-portrait-key="${option.id}" class="${choices[selectedRace] === option.id ? "is-selected" : ""}" title="${option.label}"><img src="${option.src}" alt="${option.label}" /><small>${option.label}</small></button>`).join("")}</div>`;
-    picker.querySelectorAll("[data-portrait-key]").forEach(button => button.onclick = () => { choices[race()] = button.dataset.portraitKey; delete layout.dataset.portraitRace; renderPicker(layout); apply(layout); });
+    picker.querySelectorAll("[data-portrait-key]").forEach(button => button.onclick = () => { if (race() === "beastfolk") selectedBeastfolk = button.dataset.portraitKey; choices[race()] = button.dataset.portraitKey; delete layout.dataset.portraitRace; renderPicker(layout); apply(layout); });
     picker.querySelector("[data-portrait-random]").onclick = () => { generated[race()] = createPremiumPortrait(race()); choices[race()] = "random"; delete layout.dataset.portraitRace; renderPicker(layout); apply(layout); };
     layout.append(picker); apply(layout);
   }
