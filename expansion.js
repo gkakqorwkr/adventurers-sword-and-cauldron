@@ -48,6 +48,19 @@
     {title:"사라진 사냥꾼의 발자국",role:"젖은 숲바닥",text:"피 묻은 발자국과 부러진 화살이 이어진다. 누군가 마물에게 쫓기고 있었던 모양이다.",choices:[{label:"발자국을 추적한다",story:"사라진 사냥꾼의 흔적을 추적하기로 했다.",followup:"hunterTrail"},{label:"화살을 챙기고 야영지로 알린다",story:"위험한 흔적을 길드에 알리기로 했다.",gold:12,xp:3}]},
     {title:"무너진 돌다리",role:"비 내린 계곡",text:"건너편에서 종소리가 들린다. 돌다리 아래에는 희미한 빛이 반짝인다.",choices:[{label:"다리 아래의 빛을 살핀다",story:"차가운 물살을 헤치고 빛을 확인하러 갔다.",followup:"herbCache"},{label:"돌을 쌓아 다리를 보수한다",story:"지나는 이들을 위해 무너진 다리에 돌을 얹었다.",xp:6}]}
   ];
+  // 안개 낀 숲길의 사건 풀: NPC 4종과 아래 환경 사건 13종이 무작위로 등장합니다.
+  worldEvents.push(
+    {title:"까마귀의 대가",role:"검은 날개",text:"금빛 단추를 문 까마귀가 세 번 울고는, 깊은 숲으로 날아간다.",choices:[{label:"반짝이는 것을 따라간다",story:"까마귀가 남긴 깃털을 따라갔다.",followup:"ravenTrade"},{label:"먹이를 남기고 길을 지킨다",story:"까마귀에게 먹이를 놓고 안전한 길을 골랐다.",xp:4}]},
+    {title:"이끼 낀 제단",role:"잊힌 신앙",text:"비에 젖은 제단의 홈에서 푸른 불꽃이 깜박인다. 손바닥 크기의 돌문양이 보인다.",choices:[{label:"문양에 손을 얹는다",story:"차가운 제단의 문양에 손을 얹었다.",followup:"moonShrine"},{label:"제단 주변을 조사한다",story:"제단을 건드리지 않고 주변의 흔적을 살폈다.",xp:5,item:"bitterCap"}]},
+    {title:"버려진 수레",role:"진흙길",text:"한쪽 바퀴가 빠진 수레와 찢긴 천막이 길을 막고 있다. 수레 바닥에는 긁힌 자국이 선명하다.",choices:[{label:"끌고 간 흔적을 추적한다",story:"수레를 끌고 간 존재의 흔적을 따라갔다.",followup:"wagonTracks"},{label:"쓸 만한 부품을 챙긴다",story:"수레에서 쓸 만한 물건을 챙겼다.",gold:10,xp:3}]},
+    {title:"속삭이는 우물",role:"안개 속 물소리",text:"폐허의 우물 안에서 누군가 당신의 이름을 부른다. 물 위에는 은빛 원이 퍼진다.",choices:[{label:"밧줄을 내려보낸다",story:"우물 아래의 목소리에 답하기로 했다.",followup:"wellWhispers"},{label:"우물을 봉인하고 떠난다",story:"돌을 얹어 우물의 입을 막았다.",xp:6}]},
+    {title:"사슴뿔 그림자",role:"숲의 경계",text:"수정처럼 빛나는 뿔이 나무 사이를 스친다. 발밑에는 별가루 같은 흔적이 남는다.",choices:[{label:"별가루 흔적을 따른다",story:"수정 사슴의 흔적을 조심스럽게 따랐다.",followup:"stagChase"},{label:"숨을 죽이고 길을 비킨다",story:"숲의 주인을 방해하지 않기로 했다.",xp:4}]},
+    {title:"밀렵꾼의 덫",role:"녹슨 쇠사슬",text:"상처 난 짐승의 울음소리와 함께, 나무마다 밀렵꾼의 덫이 걸려 있다.",choices:[{label:"덫의 주인을 찾아간다",story:"밀렵꾼의 야영지를 찾기로 했다.",followup:"poacherCamp"},{label:"덫을 해체하고 짐승을 놓아준다",story:"덫을 하나씩 해체해 숲의 짐승을 풀어줬다.",xp:7}]},
+    {title:"균사체 원",role:"버섯의 숨결",text:"거대한 버섯들이 원을 이루고 있다. 원의 한가운데에는 아직 따뜻한 발자국이 있다.",choices:[{label:"원 안으로 들어간다",story:"버섯 원 한가운데로 발을 들였다.",followup:"sporeCircle"},{label:"바깥의 버섯만 채집한다",story:"위험한 원을 피하고 바깥 버섯을 채집했다.",item:"bitterCap",xp:3}]},
+    {title:"무너진 감시탑",role:"옛 길드의 흔적",text:"반쯤 기울어진 감시탑 꼭대기에서 신호 거울이 반짝인다. 아래에는 어두운 지하 입구가 있다.",choices:[{label:"탑 꼭대기에 오른다",story:"부서진 계단을 밟고 감시탑을 올랐다.",followup:"watchtowerSignal"},{label:"지하 입구를 표시하고 돌아간다",story:"위험한 입구를 지도에 표시했다.",gold:14,xp:4}]},
+    {title:"길 잃은 꼬마 여우",role:"붉은 꼬리",text:"작은 여우가 당신의 가방을 킁킁대며 숲 안쪽을 바라본다. 목에는 낡은 리본이 묶여 있다.",choices:[{label:"여우를 따라간다",story:"꼬마 여우가 가리킨 오솔길을 따라갔다.",followup:"foxTrail"},{label:"먹이를 나누고 떠난다",story:"여우에게 먹이를 나누고 길을 재촉했다.",xp:4}]},
+    {title:"밤의 등불 행렬",role:"달 없는 밤",text:"안개 너머로 등불을 든 사람들의 행렬이 지나간다. 발자국은 진흙 위에 남지 않는다.",choices:[{label:"등불 행렬에 합류한다",story:"이름 없는 등불 행렬의 뒤를 따랐다.",followup:"lanternPath"},{label:"불을 피우고 아침까지 기다린다",story:"낯선 행렬을 피하고 야영했다.",xp:3}]}
+  );
   const followups = {
     treasurePath: [
       {title:"보물길의 끝",text:"이끼 낀 석상 뒤에서 오래된 금화 주머니를 발견했다.",gold:42},
@@ -70,6 +83,58 @@
       {title:"마렉의 다음 편지",text:"마렉은 떠났지만, 독특한 손질법을 적어 두었다.",recipe:"mimicToast",xp:5}
     ]
   };
+  Object.assign(followups, {
+    ravenTrade:[
+      {title:"까마귀의 둥지",text:"까마귀 둥지에서 길드 인장이 든 주머니를 찾아 금화를 얻었다.",gold:24},
+      {title:"까마귀의 둥지",text:"둥지 아래의 상자는 미믹의 먹이통이었다.",enemy:["미믹",27,9,4,["mimicTooth","mimicLock"],"mimicLocket"]},
+      {title:"까마귀의 둥지",text:"까마귀는 아무것도 주지 않았지만, 숨은 샛길을 알려 주었다.",xp:8}
+    ],
+    moonShrine:[
+      {title:"푸른 제단의 응답",text:"제단의 불꽃이 사그라들며 달빛나방의 가루를 남겼다.",item:"mothDust",xp:5},
+      {title:"푸른 제단의 응답",text:"제단을 지키던 달빛나방 떼가 잠을 깨웠다.",enemy:["달빛나방",16,7,2,["mothDust","moonWing"],"moonRing"]},
+      {title:"푸른 제단의 응답",text:"아무 일도 일어나지 않았지만, 오래된 기도문을 읽으며 마음을 다잡았다.",xp:9}
+    ],
+    wagonTracks:[
+      {title:"수레를 끌고 간 자",text:"도둑들은 이미 떠났지만, 진흙 속에서 금화 주머니를 떨어뜨렸다.",gold:30},
+      {title:"수레를 끌고 간 자",text:"수레를 끌던 것은 동굴거미였다. 거미줄이 길을 막았다.",enemy:["동굴거미",21,8,3,["spiderLeg","venomSac"],"spiderSilkVest"]},
+      {title:"수레를 끌고 간 자",text:"흔적은 빗물에 사라졌지만, 수레바퀴 자국을 읽는 법을 배웠다.",xp:7}
+    ],
+    wellWhispers:[
+      {title:"우물 아래의 목소리",text:"우물 속 은빛 물고기가 오래된 금화를 밀어 올렸다.",gold:36},
+      {title:"우물 아래의 목소리",text:"목소리는 물에 숨어 있던 점액괴의 유인이었다.",enemy:["이끼 점액괴",15,5,1,["slimeGel"]]},
+      {title:"우물 아래의 목소리",text:"목소리는 사라졌지만, 물 위의 별자리를 읽어 지혜를 얻었다.",xp:10}
+    ],
+    stagChase:[
+      {title:"별가루 오솔길",text:"수정 사슴이 떨어뜨린 뿔 조각을 발견했다.",item:"crystalShard",xp:4},
+      {title:"별가루 오솔길",text:"사슴을 노리던 굶주린 뿔멧돼지가 돌진해 왔다.",enemy:["뿔멧돼지",23,7,2,["boarMeat","boarHorn"],"boarSpear"]},
+      {title:"별가루 오솔길",text:"사슴은 숲 깊은 곳으로 사라졌지만, 별가루가 숨은 길을 밝혀 주었다.",gold:18,xp:4}
+    ],
+    poacherCamp:[
+      {title:"밀렵꾼의 야영지",text:"도망친 밀렵꾼의 상자에서 장비값으로 쓸 금화를 챙겼다.",gold:38},
+      {title:"밀렵꾼의 야영지",text:"밀렵꾼이 키우던 흑염소 사자가 쇠사슬을 끊고 달려들었다.",enemy:["흑염소 사자",31,10,3,["blackMane","charcoalClaw"],"boarSpear"]},
+      {title:"밀렵꾼의 야영지",text:"야영지는 비어 있었지만, 덫을 피하는 방법을 익혔다.",xp:9}
+    ],
+    sporeCircle:[
+      {title:"버섯 원의 중심",text:"버섯 원 중앙에서 해독 성분이 짙은 쓴갓을 찾았다.",item:"bitterCap",gold:14},
+      {title:"버섯 원의 중심",text:"균사체를 밟자 거대한 동굴거미가 잠에서 깨어났다.",enemy:["동굴거미",21,8,3,["spiderLeg","venomSac"],"spiderSilkVest"]},
+      {title:"버섯 원의 중심",text:"환각은 오래가지 않았지만, 마물 식재료의 독성을 분별하는 감각을 얻었다.",xp:11}
+    ],
+    watchtowerSignal:[
+      {title:"감시탑의 신호",text:"신호 거울 뒤에서 옛 길드의 금화 상자를 발견했다.",gold:46},
+      {title:"감시탑의 신호",text:"거울빛에 이끌린 서리박쥐 떼가 탑 안으로 몰려들었다.",enemy:["서리박쥐",14,6,1,["batWing","frostFang"]]},
+      {title:"감시탑의 신호",text:"아무도 오지 않았지만, 멀리 연기골 마을의 방향을 정확히 확인했다.",xp:8}
+    ],
+    foxTrail:[
+      {title:"여우가 가리킨 굴",text:"여우는 반짝이는 동전이 든 둥지를 보여 주고 사라졌다.",gold:22},
+      {title:"여우가 가리킨 굴",text:"굴에는 새끼용의 허물이 걸려 있었고, 곧 화난 새끼용이 나타났다.",enemy:["새끼용",34,11,4,["drakeScale","dragonGland"],"emberDagger"]},
+      {title:"여우가 가리킨 굴",text:"굴은 비어 있었지만, 여우의 재빠른 발걸음을 흉내 내며 민첩한 길찾기를 익혔다.",xp:9}
+    ],
+    lanternPath:[
+      {title:"등불 행렬의 종착지",text:"행렬은 오래된 순례자들의 기억이었다. 사라진 자리에 금화가 남았다.",gold:34},
+      {title:"등불 행렬의 종착지",text:"등불이 한꺼번에 꺼지고, 폐허의 미믹이 길을 가로막았다.",enemy:["미믹",27,9,4,["mimicTooth","mimicLock"],"mimicLocket"]},
+      {title:"등불 행렬의 종착지",text:"행렬은 안개 속으로 녹아들었지만, 당신의 이야기에 새로운 한 줄이 남았다.",xp:12}
+    ]
+  });
   let game, modal;
   const esc = text => String(text).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const itemData = id => window.GEAR?.[id] || window.ITEMS?.[id] || extraItems[id] || {name:id,icon:"?"};
