@@ -18,11 +18,13 @@
   const apply = layout => { const image = layout.querySelector(".portrait-overlay"); if (image) image.src = selected(race()).src; };
   function renderPicker(layout) {
     const selectedRace = race();
+    if (layout.dataset.portraitRace === selectedRace && layout.querySelector(".portrait-variants")) { apply(layout); return; }
     layout.querySelector(".portrait-variants")?.remove();
+    layout.dataset.portraitRace = selectedRace;
     const picker = document.createElement("div"); picker.className = "portrait-variants";
     picker.innerHTML = `<div class="portrait-variant-head"><span>기존 초상화 선택</span><button type="button" data-portrait-random>🎲 무작위 외형</button></div><div class="portrait-variant-grid">${catalog[selectedRace].map(option => `<button type="button" data-portrait-key="${option.id}" class="${choices[selectedRace] === option.id ? "is-selected" : ""}" title="${option.label}"><img src="${option.src}" alt="${option.label}" /><small>${option.label}</small></button>`).join("")}</div>`;
-    picker.querySelectorAll("[data-portrait-key]").forEach(button => button.onclick = () => { choices[race()] = button.dataset.portraitKey; renderPicker(layout); apply(layout); });
-    picker.querySelector("[data-portrait-random]").onclick = () => { const options = catalog[race()]; choices[race()] = options[Math.floor(Math.random() * options.length)].id; renderPicker(layout); apply(layout); };
+    picker.querySelectorAll("[data-portrait-key]").forEach(button => button.onclick = () => { choices[race()] = button.dataset.portraitKey; delete layout.dataset.portraitRace; renderPicker(layout); apply(layout); });
+    picker.querySelector("[data-portrait-random]").onclick = () => { const options = catalog[race()]; choices[race()] = options[Math.floor(Math.random() * options.length)].id; delete layout.dataset.portraitRace; renderPicker(layout); apply(layout); };
     layout.append(picker); apply(layout);
   }
   function refresh() { document.querySelectorAll(".portrait-layout").forEach(renderPicker); }
