@@ -41,7 +41,7 @@
   }));
   const escape = value => String(value).replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[char]);
 
-  function currentRegion(player) { if (player.level < 3) return regions[0]; if (player.level < 5) return regions[1]; if (player.level < 7) return regions[2]; if (player.level < 9) return regions[3]; return regions[4]; }
+  function currentRegion(player) { return regions.find(region => region.id === player.currentRegionId) || (player.level < 3 ? regions[0] : player.level < 5 ? regions[1] : player.level < 7 ? regions[2] : player.level < 9 ? regions[3] : regions[4]); }
   function ensure(player) { player.discoveredRegionalMonsters ||= []; player.discoveredRecipes ||= []; }
   function addIngredients() { monsters.forEach(monster => { if (!window.ITEMS[monster.dropId]) window.ITEMS[monster.dropId] = { id: monster.dropId, name: monster.dropName, type: "ingredient", tags: ["마물", "육류"], toxicity: 0 }; }); }
   function makeModal() {
@@ -61,9 +61,9 @@
     body.innerHTML = `<p class="regional-intro">마물은 조우해야, 요리는 재료를 정확히 섞어야 기록됩니다. 미발견 항목은 모습을 드러내지 않습니다.</p>${regions.map(section).join("")}`; ui.modal.classList.add("open");
   }
   function boot() {
-    const game = window.game; if (!game || !window.ITEMS) return setTimeout(boot, 50); addIngredients(); window.REGIONAL_RECIPES = recipes; window.REGIONAL_MONSTERS = monsters; ensure(game.player);
+    const game = window.game; if (!game || !window.ITEMS) return setTimeout(boot, 50); addIngredients(); window.REGIONAL_RECIPES = recipes; window.REGIONAL_MONSTERS = monsters; window.REGIONS = regions; ensure(game.player); game.player.currentRegionId ||= "mistwood";
     const ui = makeModal(); const previousRender = game.render.bind(game);
-    game.render = () => { previousRender(); const region = currentRegion(game.player); const location = document.querySelector("#location"); if (location) location.textContent = game.scene === "camp" ? "잿불 길드의 야영지" : `${region.name}${game.enemy ? " — 전투" : ""}`; const regionalMonster = monsters.find(monster => monster.name === game.enemy?.name); if (regionalMonster) { const scene = document.querySelector("#scene"), heading = scene.querySelector("h2"); if (heading && !scene.querySelector(".scene-monster-art")) heading.insertAdjacentHTML("beforebegin", `<img class="scene-monster-art" src="${regionalMonster.image}" alt="${escape(regionalMonster.name)}" />`); } };
+    game.render = () => { previousRender(); const region = currentRegion(game.player); const location = document.querySelector("#location"); if (location) location.textContent = game.scene === "camp" ? "잿불 길드의 야영지" : `${region.name}${game.enemy ? " — 전투" : ""}`; const regionalMonster = monsters.find(monster => monster.name === game.enemy?.name); const image = game.enemy?.image || regionalMonster?.image; if (image) { const scene = document.querySelector("#scene"), heading = scene.querySelector("h2"); if (heading && !scene.querySelector(".scene-monster-art")) heading.insertAdjacentHTML("beforebegin", `<img class="scene-monster-art" src="${image}" alt="${escape(game.enemy?.name || regionalMonster?.name || "마물")}" />`); } };
     const previousExplore = game.explore.bind(game);
     game.explore = () => { if (game.enemy || Math.random() > .58) return previousExplore(); const player = game.player; game.advanceTurn(); player.stamina -= 2; player.hunger -= 5; game.clamp(); if (!player.hp) return game.defeat(); const region = currentRegion(player), pool = monsters.filter(monster => monster.region === region.id), monster = pool[Math.floor(Math.random() * pool.length)]; player.discoveredRegionalMonsters.push(monster.id); game.enemy = { name: monster.name, hp: monster.hp, maxHp: monster.hp, atk: monster.atk, def: monster.def, drops: [monster.dropId] }; game.scene = "combat"; game.log(`${region.name}에서 ${monster.name}이(가) 길을 막아섰다! ${monster.dropName}을(를) 노려볼 수 있다.`); };
     const book = document.querySelector(".system-dock [data-book]"); if (book) book.onclick = () => openBook(ui, game); game.render();

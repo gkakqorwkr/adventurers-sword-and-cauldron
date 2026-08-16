@@ -68,7 +68,8 @@ class CombatSystem {
   attack(style = "normal") {
     const { player: p, enemy } = this.game; if (!enemy) return;
     const critical = Math.random() * 20 + 1 + p.attributes.agility >= 22;
-    const power = p.attributes.strength + Math.floor(Math.random() * 6) + 2 + (style === "careful" ? 1 : 0);
+    const satietyMod = p.hunger >= 90 ? 2 : p.hunger >= 75 ? 1 : p.hunger <= 10 ? -3 : p.hunger <= 25 ? -2 : p.hunger <= 45 ? -1 : 0;
+    const power = p.attributes.strength + Math.floor(Math.random() * 6) + 2 + satietyMod + (style === "careful" ? 1 : 0);
     const damage = Math.max(1, power - enemy.def) * (critical ? 2 : 1); enemy.hp -= damage; p.stamina -= 1;
     this.game.log(`${critical ? "치명타! " : ""}${enemy.name}에게 ${damage} 피해를 주었다.`);
     if (enemy.hp <= 0) {
@@ -110,7 +111,9 @@ function render(g) {
   const p = g.player; const race = RACES[p.raceId];
   document.querySelector("#location").textContent = g.scene === "camp" ? "잿불 길드의 야영지" : g.scene === "combat" ? "안개 낀 숲길 — 전투" : "안개 낀 숲길";
   const activeEffects = (p.statusEffects || []).filter(effect => effect.turns > 0);
-  const effectText = activeEffects.length ? `<p class="active-effects">${activeEffects.map(effect => `✦ ${effect.name || effect.id} ${effect.turns}턴`).join(" · ")}</p>` : "";
+  const satietyMod = p.hunger >= 90 ? 2 : p.hunger >= 75 ? 1 : p.hunger <= 10 ? -3 : p.hunger <= 25 ? -2 : p.hunger <= 45 ? -1 : 0;
+  const satietyText = satietyMod ? `🍽 ${p.hunger >= 75 ? "든든함" : "허기"}: 공격 ${satietyMod > 0 ? "+" : ""}${satietyMod}` : "🍽 평상시 포만감";
+  const effectText = `<p class="active-effects">${satietyText}${activeEffects.length ? ` · ${activeEffects.map(effect => `✦ ${effect.name || effect.id} ${effect.turns}턴`).join(" · ")}` : ""}</p>`;
   document.querySelector("#hero-card").innerHTML = `<div><h2 class="hero-name">${p.name} <span class="muted">Lv.${p.level} · ${race.name}</span></h2><p class="hero-meta">${race.description}</p>${bar("HP", p.hp, p.maxHp)}${bar("STAMINA", p.stamina, p.maxStamina, "stamina")}${bar("SATIETY", p.hunger, 100, "hunger")}${effectText}</div><div class="stats"><strong>힘 ${p.attributes.strength}</strong><span>민첩 ${p.attributes.agility}</span><span>지능 ${p.attributes.intelligence}</span><span>매력 ${p.attributes.charisma}</span><span>건강 ${p.attributes.constitution}</span><span>지혜 ${p.attributes.wisdom}</span><span class="muted">가방 ${p.inventory.length}</span><span class="muted">XP ${p.xp}</span><span class="muted">금화 ${p.gold || 0}</span></div>`;
   const scene = document.querySelector("#scene");
   scene.innerHTML = g.enemy ? `<h2>${g.enemy.name}</h2><p>HP ${Math.max(0, g.enemy.hp)}/${g.enemy.maxHp} · 공격 ${g.enemy.atk} · 방어 ${g.enemy.def}</p><p>저 괴물은 요리 가능한 재료를 품고 있다. 검을 들 것인가, 도망칠 것인가?</p>` : g.scene === "camp" ? `<h2>야영지의 작은 불꽃</h2><p>길드의 의뢰 게시판은 비어 있다. 그러나 북쪽 숲에는 사라진 사냥꾼과 기묘한 마물 요리의 소문이 떠돈다.</p>` : `<h2>안개 낀 숲길</h2><p>젖은 흙길과 낡은 돌무더기가 이어진다. 발자국, 약초, 위험이 모두 안개 속에 섞여 있다.</p>`;
