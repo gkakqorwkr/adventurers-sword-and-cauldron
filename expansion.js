@@ -110,10 +110,15 @@
     const price = mode === "buy" ? gear.price : Math.floor(gear.price / 2);
     return `<article class="shop-card"><span>${gear.icon}</span><div><h4>${gear.name}</h4><p>${gear.label} · ${Object.entries(gear.mods).map(([stat,value])=>`${({strength:"힘",agility:"민첩",intelligence:"지능",charisma:"카리스마",constitution:"건강",wisdom:"지혜"})[stat]} +${value}`).join(" · ")}</p><small>${gear.description}</small></div><button type="button" data-${mode}="${id}">${mode === "buy" ? `${price} G 구매` : `${price} G 판매`}</button></article>`;
   }
+  function sellableCount(player, id) {
+    const owned = player.inventory.filter(item => item === id).length;
+    const equipped = Object.values(player.equipment || {}).filter(item => item === id).length;
+    return Math.max(0, owned - equipped);
+  }
   function openTown() {
     const p = ensure();
-    const owned = [...new Set(p.inventory.filter(id => window.GEAR?.[id]?.price))];
-    open("연기골 마을", `장비 상점 · ${p.gold} G`, `<p class="town-copy">숯 냄새가 감도는 작은 길목 마을이다. 대장장이 루카가 모험가의 장비를 살피며 손을 흔든다.</p><section class="shop-section"><h3>루카의 장비 상점</h3>${townStock.map(id=>shopCard(id,"buy")).join("")}</section><section class="shop-section"><h3>내 장비 판매</h3>${owned.length ? owned.map(id=>shopCard(id,"sell")).join("") : `<p class="empty-journal">판매할 장비가 없습니다.</p>`}</section>`);
+    const owned = [...new Set(p.inventory.filter(id => window.GEAR?.[id]?.price))].filter(id => sellableCount(p,id) > 0);
+    open("연기골 마을", `장비 상점 · ${p.gold} G`, `<p class="town-copy">숯 냄새가 감도는 작은 길목 마을이다. 대장장이 루카가 모험가의 장비를 살피며 손을 흔든다.</p><section class="shop-section"><h3>루카의 장비 상점</h3>${townStock.map(id=>shopCard(id,"buy")).join("")}</section><section class="shop-section"><h3>내 장비 판매</h3>${owned.length ? owned.map(id=>shopCard(id,"sell")).join("") : `<p class="empty-journal">판매할 여분 장비가 없습니다.<br>착용 중인 장비는 판매 목록에 표시되지 않습니다.</p>`}</section>`);
     modal.querySelectorAll("[data-buy]").forEach(button => button.onclick = () => buyGear(button.dataset.buy));
     modal.querySelectorAll("[data-sell]").forEach(button => button.onclick = () => sellGear(button.dataset.sell));
   }
@@ -125,11 +130,10 @@
     openTown(); game.render();
   }
   function sellGear(id) {
-    const p = ensure(), gear = window.GEAR?.[id], index = p.inventory.indexOf(id);
+    const p = ensure(), gear = window.GEAR?.[id], index = p.inventory.lastIndexOf(id);
     if (!gear || index < 0) return openTown();
-    Object.keys(p.equipment || {}).forEach(slot => { if (p.equipment[slot] === id) p.equipment[slot] = null; });
+    if (sellableCount(p,id) < 1) { game.log("착용 중인 장비는 먼저 장비 탭에서 해제해야 판매할 수 있다."); return openTown(); }
     p.inventory.splice(index, 1); p.gold += Math.floor(gear.price / 2);
-    window.refreshPlayerStats?.();
     game.log(`${gear.name}을(를) ${Math.floor(gear.price / 2)} G에 판매했다.`);
     openTown(); game.render();
   }
