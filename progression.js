@@ -90,8 +90,8 @@
   }
   function openInn() {
     const p = ensure();
-    open("길목의 작은 여관", "RARE REST EVENT", `<article class="progress-card"><p>따뜻한 수프 냄새가 새어 나오는 작은 여관을 발견했다. 하룻밤을 묵으며 식사까지 해결할 수 있다.</p><div class="progress-choices"><button type="button" data-inn>8G로 휴식과 식사</button><button type="button" data-close>지금은 길을 재촉한다</button></div></article>`);
-    modal.querySelector("[data-inn]").onclick = () => { if (p.gold < 8) { game.log("여관비가 부족해 따뜻한 물만 얻어 마셨다."); p.stamina += 3; } else { p.gold -= 8; p.hp += 14; p.stamina += 12; p.hunger += 32; game.log("여관에서 푹 쉬고 따뜻한 식사를 했다."); } game.clamp(); recordStory("길목의 작은 여관", "잠시 쉬며 몸과 허기를 돌봤다."); close(); game.render(); };
+    open("길목의 작은 여관", "RARE REST EVENT", `<article class="progress-card"><p>따뜻한 수프 냄새가 새어 나오는 작은 여관을 발견했다. 하룻밤을 묵고 든든한 식사로 허기까지 완전히 해결할 수 있다.</p><div class="progress-choices"><button type="button" data-inn>8G로 휴식과 만찬</button><button type="button" data-close>지금은 길을 재촉한다</button></div></article>`);
+    modal.querySelector("[data-inn]").onclick = () => { if (p.gold < 8) { game.log("여관비가 부족해 따뜻한 물만 얻어 마셨다."); p.stamina += 3; } else { p.gold -= 8; p.hp += 14; p.stamina += 12; p.hunger = 100; game.log("여관에서 푹 쉬고 만찬을 먹어 허기를 완전히 채웠다."); } game.clamp(); recordStory("길목의 작은 여관", "따뜻한 식사로 허기를 완전히 채우고 몸을 돌봤다."); close(); game.render(); };
     modal.querySelector("[data-close]").onclick = close;
   }
   function queueFollowup() { const p = ensure(); p.regionalFollowups ||= []; p.regionalFollowups.push({ regionId: region().id }); game.log("작은 도움의 여파가 훗날 다시 돌아올지도 모른다."); }
