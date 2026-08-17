@@ -102,6 +102,7 @@
   function modifiersText(mods) { return Object.entries(mods).map(([key, value]) => `${STAT_NAMES[key]} +${value}`).join(" · "); }
   function recompute(player) {
     const race = RACES[player.raceId]; const base = player.baseAttributes || (player.baseAttributes = { ...player.attributes });
+    player.equipment ||= {}; player.equipment.accessory2 ??= null;
     const attributes = { ...base };
     Object.entries(race.bonus).forEach(([key, value]) => attributes[key] += value);
     Object.values(player.equipment || {}).filter(Boolean).forEach(id => Object.entries(GEAR[id].mods).forEach(([key, value]) => attributes[key] += value));
@@ -139,16 +140,22 @@
   }
   function openEquipment() {
     const p = game.player; const current = stacks(p.inventory.filter(id => GEAR[id])); const equipped = p.equipment || {};
-    const slots = ["weapon", "armor", "accessory"].map(slot => `<div class="equip-slot"><small>${({ weapon: "무기", armor: "방어구", accessory: "장신구" })[slot]}</small><b>${equipped[slot] ? `${GEAR[equipped[slot]].icon} ${GEAR[equipped[slot]].name}` : "비어 있음"}</b></div>`).join("");
-    const cells = Object.entries(current).map(([id, qty]) => { const gear = GEAR[id]; return `<article class="item-cell"><span class="item-cell__icon">${gear.icon}</span><strong>${gear.name}</strong><small>${gear.label} · ${modifiersText(gear.mods)}</small><b>×${qty}</b><button type="button" data-equip="${id}">${equipped[gear.slot] === id ? "장착 해제" : "장착"}</button></article>`; });
+    const labels = { weapon: "무기", armor: "방어구", accessory: "장신구", accessory2: "보조 장신구" };
+    const slots = ["weapon", "armor", "accessory", "accessory2"].map(slot => `<div class="equip-slot"><small>${labels[slot]}</small><b>${equipped[slot] ? `${GEAR[equipped[slot]].icon} ${GEAR[equipped[slot]].name}` : "비어 있음"}</b></div>`).join("");
+    const cells = Object.entries(current).map(([id, qty]) => { const gear = GEAR[id], isEquipped = Object.values(equipped).includes(id); return `<article class="item-cell"><span class="item-cell__icon">${gear.icon}</span><strong>${gear.name}</strong><small>${gear.label} · ${modifiersText(gear.mods)}</small><b>×${qty}</b><button type="button" data-equip="${id}">${isEquipped ? "장착 해제" : "장착"}</button></article>`; });
     while (cells.length < 6) cells.push(`<div class="empty-cell">+<br>장비 칸</div>`);
-    openModal("장비 관리", `${Object.keys(current).length} 종류 · ${p.gold || 0} G`, `<p class="modal-note">장비를 장착하면 능력치와 전투 판정에 즉시 반영됩니다. 여분 장비는 마을 상점에서 판매할 수 있습니다.</p><div class="equip-slots">${slots}</div><div class="inventory-cells">${cells.join("")}</div>`);
+    openModal("장비 관리", `${Object.keys(current).length} 종류 · ${p.gold || 0} G`, `<p class="modal-note">무기, 방어구, 장신구와 보조 장신구를 각각 하나씩 장착할 수 있습니다. 장비 효과는 능력치와 전투 판정에 즉시 반영됩니다.</p><div class="equip-slots">${slots}</div><div class="inventory-cells">${cells.join("")}</div>`);
     modal.querySelectorAll("[data-equip]").forEach(button => button.onclick = () => equip(button.dataset.equip));
   }
   function equip(id) {
-    const p = game.player, gear = GEAR[id]; p.equipment ||= { weapon: null, armor: null, accessory: null };
-    p.equipment[gear.slot] = p.equipment[gear.slot] === id ? null : id;
-    recompute(p); game.log(`${gear.name}${p.equipment[gear.slot] ? "을 장착했다" : "을 해제했다"}. ${modifiersText(gear.mods)}`); game.render(); openEquipment();
+    const p = game.player, gear = GEAR[id]; p.equipment ||= { weapon: null, armor: null, accessory: null, accessory2: null }; p.equipment.accessory2 ??= null;
+    const equippedSlot = Object.keys(p.equipment).find(slot => p.equipment[slot] === id);
+    if (equippedSlot) p.equipment[equippedSlot] = null;
+    else {
+      const targetSlot = gear.slot === "accessory" && p.equipment.accessory ? "accessory2" : gear.slot;
+      p.equipment[targetSlot] = id;
+    }
+    recompute(p); game.log(`${gear.name}${equippedSlot ? "을 해제했다" : "을 장착했다"}. ${modifiersText(gear.mods)}`); game.render(); openEquipment();
   }
   function openBook() {
     const monsters = MONSTERS.map(row => `<article class="monster-entry"><div class="monster-entry__icon">${row[1]}</div><div><p class="entry-meta">${row[2]} · 위협도 ${row[3]}</p><h4>${row[0]}</h4><p>${row[4]}</p><p class="drop-tag">획득: ${row[5]}</p></div></article>`).join("");
@@ -181,7 +188,7 @@
   function appearanceRow(label, part, colors) { return `<div class="appearance-row"><label>${label}</label><div class="swatches">${colors.map(color => `<button type="button" class="swatch ${state.appearance[part] === color ? "is-selected" : ""}" style="--swatch:${color}" data-part="${part}" data-swatch="${color}"></button>`).join("")}</div></div>`; }
   function randomPortrait() { const picks = { skin: ["#c88864", "#e1ad7c", "#9b624b", "#704134"], hair: ["#342019", "#7d4b2a", "#d6ad54", "#d6d2c4"], eyes: ["#6fbd9c", "#6d9bd0", "#b67c5e", "#a594d4"] }; Object.keys(picks).forEach(key => state.appearance[key] = picks[key][Math.floor(Math.random() * picks[key].length)]); renderCreator(); }
   function confirmCreator() {
-    const p = game.player; p.name = state.name.trim() || "이름 없는 모험가"; p.raceId = state.race; p.baseAttributes = { ...state.stats }; p.appearance = { ...state.appearance }; p.portraitKey = window.getSelectedPortraitKey?.(state.race) || null; p.portraitImage = window.getSelectedPortraitSrc?.(state.race) || null; p.level = 1; p.xp = 0; p.gold = 35; p.nextLevelXp = 10; p.unspentPoints = 0; p.statusEffects = []; p.equipment = { weapon: "rustSword", armor: "leatherCoat", accessory: "amberCharm" }; p.inventory = ["fieldKnife", "ironPot", "slimeGel", "bitterCap", "bitterCap", "rustSword", "leatherCoat", "amberCharm"]; p.hp = 999; p.stamina = 999; p.hunger = 78; recompute(p); game.log(`${p.name}, ${RACES[p.raceId].name} 모험가가 길드에 등록되었다.`); creator.hidden = true; game.render();
+    const p = game.player; p.name = state.name.trim() || "이름 없는 모험가"; p.raceId = state.race; p.baseAttributes = { ...state.stats }; p.appearance = { ...state.appearance }; p.portraitKey = window.getSelectedPortraitKey?.(state.race) || null; p.portraitImage = window.getSelectedPortraitSrc?.(state.race) || null; p.level = 1; p.xp = 0; p.gold = 35; p.nextLevelXp = 10; p.unspentPoints = 0; p.statusEffects = []; p.equipment = { weapon: "rustSword", armor: "leatherCoat", accessory: "amberCharm", accessory2: null }; p.inventory = ["fieldKnife", "ironPot", "slimeGel", "bitterCap", "bitterCap", "rustSword", "leatherCoat", "amberCharm"]; p.hp = 999; p.stamina = 999; p.hunger = 78; recompute(p); game.log(`${p.name}, ${RACES[p.raceId].name} 모험가가 길드에 등록되었다.`); creator.hidden = true; game.render();
   }
   function showCreator() { if (!state) state = { name: "리아", race: "human", stats: { strength: 2, agility: 2, intelligence: 2, charisma: 2, constitution: 2, wisdom: 2 }, points: 8, appearance: { skin: "#c88864", hair: "#342019", eyes: "#6fbd9c" } }; creator.hidden = false; renderCreator(); }
   function boot() {
