@@ -80,6 +80,7 @@
   }
   function openBook(ui, game) {
     const player = game.player; ensure(player); const body = ui.modal.querySelector(".regional-modal__body");
+    const activeRegionId = regions.some(region => region.id === player.bookRegionId) ? player.bookRegionId : currentRegion(player).id;
     const section = region => {
       const seenMonsters = monsters.filter(monster => monster.region === region.id && player.discoveredRegionalMonsters.includes(monster.id));
       const seenRecipes = recipes.filter(recipe => recipe.region === region.id && player.discoveredRecipes.includes(recipe.id));
@@ -87,7 +88,11 @@
       const recipeCards = seenRecipes.length ? seenRecipes.map(recipe => `<article class="regional-card recipe"><img src="${recipe.image}" alt="${escape(recipe.name)}" /><div><h3>${escape(recipe.name)}</h3><p>${recipe.need.map(id => escape(window.ITEMS[id]?.name || id)).join(" + ")}</p><small>${escape(recipe.effect)}</small></div></article>`).join("") : '<p class="regional-empty">아직 이 지역에서 완성한 요리가 없습니다.</p>';
       return `<section class="regional-section"><h3>${region.name}</h3><p class="regional-count">마물 ${seenMonsters.length}/${region.monsters.length} · 요리 ${seenRecipes.length}/${region.recipes.length}</p><h4>발견한 마물</h4><div class="regional-grid">${monsterCards}</div><h4>발견한 요리</h4><div class="regional-grid">${recipeCards}</div></section>`;
     };
-    body.innerHTML = `<p class="regional-intro">마물은 조우해야, 요리는 재료를 정확히 섞어야 기록됩니다. 미발견 항목은 모습을 드러내지 않습니다.</p>${regions.map(section).join("")}`; ui.modal.classList.add("open");
+    const tabs = regions.map(region => `<button type="button" role="tab" aria-selected="${region.id === activeRegionId}" class="regional-tab ${region.id === activeRegionId ? "is-active" : ""}" data-book-region="${region.id}">${escape(region.name)}</button>`).join("");
+    const activeRegion = regions.find(region => region.id === activeRegionId) || regions[0];
+    body.innerHTML = `<p class="regional-intro">마물은 조우해야, 요리는 재료를 정확히 섞어야 기록됩니다. 미발견 항목은 모습을 드러내지 않습니다.</p><nav class="regional-tabs" role="tablist" aria-label="지역별 도감">${tabs}</nav>${section(activeRegion)}`;
+    body.querySelectorAll("[data-book-region]").forEach(button => button.onclick = () => { player.bookRegionId = button.dataset.bookRegion; ui.modal.querySelector(".regional-modal__panel").scrollTop = 0; openBook(ui, game); });
+    ui.modal.classList.add("open");
   }
   function boot() {
     const game = window.game; if (!game || !window.ITEMS) return setTimeout(boot, 50); addIngredients(); window.applyItemVisuals?.(); window.REGIONAL_RECIPES = recipes; window.REGIONAL_MONSTERS = monsters; window.REGIONS = regions; ensure(game.player); game.player.currentRegionId ||= "mistwood";
