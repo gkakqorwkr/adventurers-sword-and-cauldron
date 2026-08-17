@@ -42,10 +42,15 @@
   function recordStory(title, detail) { const p = ensure(); p.story ||= []; p.story.unshift({ title, detail }); p.story = p.story.slice(0, 20); }
   function grantRecipe() { const p = ensure(); p.discoveredRecipes ||= []; const choices = (window.REGIONAL_RECIPES || []).filter(recipe => recipe.region === region().id && !p.discoveredRecipes.includes(recipe.id)); if (!choices.length) return "새로운 조리법의 단서는 이미 모두 익숙하다."; const recipe = choices[Math.floor(Math.random() * choices.length)]; p.discoveredRecipes.push(recipe.id); return `${recipe.name} 레시피를 배웠다.`; }
   function gearDrops(index, guaranteed = false) {
-    const pool = Object.keys(window.GEAR || {}).filter(id => window.GEAR[id].price);
+    const tiers = [[0, 70], [60, 105], [90, 140], [115, 175], [140, Infinity]];
+    const [min, max] = tiers[Math.max(0, Math.min(index, tiers.length - 1))];
+    const eligible = Object.keys(window.GEAR || {}).filter(id => {
+      const gear = window.GEAR[id];
+      return gear.price && !gear.unique && gear.price >= min && gear.price <= max;
+    });
+    const pool = eligible.length ? eligible : Object.keys(window.GEAR || {}).filter(id => window.GEAR[id].price && !window.GEAR[id].unique);
     if (!pool.length || (!guaranteed && Math.random() >= .2)) return [];
-    const start = Math.min(pool.length - 1, index * 8);
-    return [pool[(start + Math.floor(Math.random() * Math.min(12, pool.length - start))) % pool.length]];
+    return [pool[Math.floor(Math.random() * pool.length)]];
   }
   function markGate() {
     const p = ensure();
@@ -62,7 +67,9 @@
     p.discoveredRegionalMonsters.push(monster.id);
     const regionIndex = window.REGIONS.indexOf(here);
     const ingredients = ingredientDrop(monster);
-    game.enemy = { name: monster.name, hp: monster.hp, maxHp: monster.hp, atk: monster.atk, def: monster.def, drops: [...ingredients, ...gearDrops(regionIndex)], image: monster.image, regionId: here.id };
+    const threat = 1 + Math.max(0, regionIndex) * .16;
+    const hp = Math.round(monster.hp * threat), atk = monster.atk + Math.max(0, regionIndex), def = monster.def + Math.floor(Math.max(0, regionIndex) / 2);
+    game.enemy = { name: monster.name, hp, maxHp: hp, atk, def, drops: [...ingredients, ...gearDrops(regionIndex)], image: monster.image, regionId: here.id };
     game.scene = "combat";
     game.log(`${here.name}에서 ${monster.name}이(가) 나타났다. ${ingredients.length ? `${monster.dropName}을(를) 노려볼 수 있다.` : "이번에는 조리 재료를 지니고 있지 않은 듯하다."}`);
   }
@@ -73,15 +80,20 @@
   }
   function openShaman() {
     const here = region();
-    open("길목의 주술사", "TURNING POINT", `<article class="progress-card"><p>낡은 가면을 쓴 주술사가 ${here.name}의 경계를 가리킨다.</p><h3>“길은 수호자의 피를 기억한다.”</h3><p>이 지역의 보스급 수호자를 쓰러뜨리면 다음 지역을 선택할 수 있다.</p><button type="button" data-boss>수호자에게 도전한다</button><button type="button" data-close>아직 준비가 필요하다</button></article>`);
+    open("길목의 주술사", "TURNING POINT", `<article class="progress-card"><p>낡은 가면을 쓴 주술사가 ${here.name}의 경계를 가리킨다.</p><h3>“길은 수호자의 피를 기억한다.”</h3><p>이 지역의 보스급 수호자를 쓰러뜨리면, 정해진 다음 지역으로 향할 길이 열린다.</p><button type="button" data-boss>수호자에게 도전한다</button><button type="button" data-close>아직 준비가 필요하다</button></article>`);
     modal.querySelector("[data-boss]").onclick = () => { close(); spawnBoss(); game.render(); };
     modal.querySelector("[data-close]").onclick = () => { resetCycle("주술사는 당신의 준비가 아직 부족하다며 안개 속으로 사라졌다."); close(); game.render(); };
   }
   function resetCycle(note) { const p = ensure(); p.regionBattles = 0; p.regionNpcInteractions = 0; p.regionGateState = "exploring"; game.log(note); }
   function openRoutes(source = "수호자의 흔적") {
-    const here = region(), options = window.REGIONS.filter(row => row.id !== here.id);
-    open("갈림길의 선택", source.toUpperCase(), `<article class="progress-card"><p>${source}이(가) 새로운 길을 드러냈다. 떠날 곳을 직접 고를 수 있다.</p><div class="progress-choices">${options.map(row => `<button type="button" data-route="${row.id}">${esc(row.name)}로 향한다</button>`).join("")}<button type="button" data-stay>아직 ${esc(here.name)}에 남는다</button></div></article>`);
-    modal.querySelectorAll("[data-route]").forEach(button => button.onclick = () => { const destination = window.REGIONS.find(row => row.id === button.dataset.route); ensure().currentRegionId = destination.id; resetCycle(`${destination.name}로 향하는 길을 선택했다.`); close(); game.scene = "wild"; game.render(); });
+    const here = region(), index = window.REGIONS.indexOf(here), destination = window.REGIONS[index + 1];
+    if (!destination) {
+      open("협곡 끝의 이정표", source.toUpperCase(), `<article class="progress-card"><p>${source}이(가) 길의 끝을 비춘다. 지금은 ${esc(here.name)} 너머로 이어진 여정이 없다.</p><div class="progress-choices"><button type="button" data-stay>이 지역을 더 탐험한다</button></div></article>`);
+      modal.querySelector("[data-stay]").onclick = () => { resetCycle(`${here.name}의 끝자락을 다시 살피기로 했다.`); close(); game.render(); };
+      return;
+    }
+    open("다음 여정", source.toUpperCase(), `<article class="progress-card"><p>${source}이(가) ${esc(destination.name)}으로 이어지는 길을 드러냈다.</p><h3>${esc(destination.name)}으로 출발하겠는가?</h3><p>더 깊은 지역에서는 더 강한 마물과 더 값진 장비가 기다린다.</p><div class="progress-choices"><button type="button" data-route="${destination.id}">${esc(destination.name)}으로 향한다</button><button type="button" data-stay>아직 ${esc(here.name)}에 남는다</button></div></article>`);
+    modal.querySelector("[data-route]").onclick = () => { ensure().currentRegionId = destination.id; resetCycle(`${destination.name}으로 향하는 길을 떠났다.`); close(); game.scene = "wild"; game.render(); };
     modal.querySelector("[data-stay]").onclick = () => { resetCycle(`${here.name}에 더 머물기로 했다. 수호자가 다시 당신의 행적을 지켜볼 것이다.`); close(); game.render(); };
   }
   function interactNpc() {

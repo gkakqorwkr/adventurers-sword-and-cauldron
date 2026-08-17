@@ -14,7 +14,8 @@
     fungalCap: 31, serpentFillet: 32, mireCore: 26, nectarPod: 34, leechPearl: 35, ramRib: 36, cinderMeat: 37, emberHeart: 38, beetleShell: 39, scorpionClaw: 40,
     thornVenison: 41, foxTail: 42, barkSap: 43, crocMeat: 44, sirenScale: 45, frogLeg: 46, salamanderMeat: 47, vultureWing: 48, buffaloRib: 49, ghostFlame: 50,
     crystalThread: 51, moleMeat: 52, basiliskEye: 53, chimeraMeat: 54, sunScorpionShell: 55,
-    boneMarrow: 52, rustOil: 30, wormMeat: 36, magmaCore: 38, wyvernWing: 24, trollMeat: 37, volcanicEel: 32, cinderEssence: 50, harpyFeather: 48, mossGel: 56
+    boneMarrow: 52, rustOil: 30, wormMeat: 36, magmaCore: 38, wyvernWing: 24, trollMeat: 37, volcanicEel: 32, cinderEssence: 50, harpyFeather: 48, mossGel: 56,
+    healthPotion: 23, staminaPotion: 30
   };
   const sprite = (folder, index, label) => `<img class="item-visual__sprite" src="assets/${folder}/${folder === "equipment" ? "g" : "i"}${String(index).padStart(2, "0")}.png" alt="${label}" />`;
   function setArt(collection, id, folder, index) { if (collection?.[id]) collection[id].icon = sprite(folder, index, collection[id].name || id); }

@@ -1,5 +1,7 @@
 (() => {
   const extraItems = {
+    healthPotion:{name:"붉은 회복 물약",icon:"🧪",type:"소모품",effect:"HP +18",hpRestore:18,price:28,description:"전투 중 생긴 상처를 빠르게 봉합하는 선홍빛 물약."},
+    staminaPotion:{name:"푸른 기력 물약",icon:"⚗️",type:"소모품",effect:"기력 +10",staminaRestore:10,price:24,description:"지친 다리에 다시 힘을 불어넣는 맑은 푸른 물약."},
     emberTail:{name:"불도마뱀 꼬리",icon:"🌶",type:"ingredient",tags:["육류","화염"],toxicity:0},
     spiderLeg:{name:"동굴거미 다리",icon:"🕷",type:"ingredient",tags:["육류","독"],toxicity:1},
     mossShell:{name:"이끼거북 등갑",icon:"🛡",type:"ingredient",tags:["광물","수분"],toxicity:0},
@@ -43,7 +45,18 @@
     {id:"chef",name:"마렉",role:"떠돌이 조리사",text:"검은 솥을 닦던 마렉이 미소 짓는다. ‘마물 고기는 겁먹은 사람보다 용감한 요리사를 좋아하지.’",choices:[{label:"그의 조리 시범을 돕는다",story:"마렉의 솥 옆에서 마물 요리의 기본을 배웠다.",recipe:"spiderFritter",item:"bitterCap"},{label:"내 방식의 레시피를 들려준다",story:"마렉과 서로의 레시피를 교환했다.",recipe:"batJerky",xp:3,followup:"cookoff"}]}
   ];
   // 보스 고유 장비는 처치 보상으로만 얻는다. 상점은 일반 장비만 취급한다.
-  const townStock = () => Object.keys(window.GEAR || {}).filter(id => window.GEAR[id].price && !window.GEAR[id].unique).sort(() => Math.random() - .5).slice(0,8);
+  const regionRank = player => Math.max(0, window.REGIONS?.findIndex(row => row.id === player.currentRegionId) ?? 0);
+  const gearTier = player => [[0, 70], [60, 105], [90, 140], [115, 175], [140, Infinity]][Math.min(regionRank(player), 4)];
+  const townStock = player => {
+    const [min, max] = gearTier(player);
+    const all = Object.keys(window.GEAR || {}).filter(id => {
+      const gear = window.GEAR[id];
+      return gear.price && !gear.unique && gear.price >= min && gear.price <= max;
+    });
+    const pool = all.length ? all : Object.keys(window.GEAR || {}).filter(id => window.GEAR[id].price && !window.GEAR[id].unique);
+    return pool.sort(() => Math.random() - .5).slice(0, Math.min(8, pool.length));
+  };
+  const potionStock = () => ["healthPotion", "staminaPotion"].filter(() => Math.random() < .58);
   const worldEvents = [
     {title:"묻힌 보물상자",role:"갈림길의 속삭임",text:"낡은 이정표 아래로 반쯤 묻힌 보물상자가 보인다. 열쇠 구멍은 아직 따뜻하다.",choices:[{label:"표시된 오솔길을 따라간다",story:"이정표의 화살표를 따라 보물길로 들어섰다.",followup:"treasurePath"},{label:"상자를 두고 안전한 길을 택한다",story:"욕심을 누르고 안전한 길을 선택했다.",xp:4}]},
     {title:"사라진 사냥꾼의 발자국",role:"젖은 숲바닥",text:"피 묻은 발자국과 부러진 화살이 이어진다. 누군가 마물에게 쫓기고 있었던 모양이다.",choices:[{label:"발자국을 추적한다",story:"사라진 사냥꾼의 흔적을 추적하기로 했다.",followup:"hunterTrail"},{label:"화살을 챙기고 야영지로 알린다",story:"위험한 흔적을 길드에 알리기로 했다.",gold:12,xp:3}]},
@@ -236,8 +249,14 @@
   function shopCard(id, mode) {
     const gear = window.GEAR?.[id];
     if (!gear) return "";
-    const price = mode === "buy" ? gear.price : Math.floor(gear.price / 2);
+    const price = mode === "buy" ? shopPrice(gear) : Math.floor(gear.price / 2);
     return `<article class="shop-card"><span>${gear.icon}</span><div><h4>${gear.name}</h4><p>${gear.label} · ${Object.entries(gear.mods).map(([stat,value])=>`${({strength:"힘",agility:"민첩",intelligence:"지능",charisma:"카리스마",constitution:"건강",wisdom:"지혜"})[stat]} +${value}`).join(" · ")}</p><small>${gear.description}</small></div><button type="button" data-${mode}="${id}">${mode === "buy" ? `${price} G 구매` : `${price} G 판매`}</button></article>`;
+  }
+  function shopPrice(gear) { return Math.ceil(gear.price * (1 + regionRank(ensure()) * .2)); }
+  function potionCard(id) {
+    const potion = window.ITEMS?.[id];
+    if (!potion) return "";
+    return `<article class="shop-card"><span>${potion.icon}</span><div><h4>${potion.name}</h4><p>${potion.type} · ${potion.effect}</p><small>${potion.description}</small></div><button type="button" data-buy-potion="${id}">${potion.price} G 구매</button></article>`;
   }
   function sellableCount(player, id) {
     const owned = player.inventory.filter(item => item === id).length;
@@ -257,19 +276,23 @@
     window.setWorldBackdrop?.(`town-${p.currentRegionId || "mistwood"}`);
     // 이전 저장 데이터에 남아 있을 수 있는 고유 장비도 즉시 상점 재고에서 정리한다.
     p.townStock = (p.townStock || []).filter(id => window.GEAR?.[id]?.price && !window.GEAR[id].unique);
-    if (refreshStock || !p.townStock.length) p.townStock = townStock();
+    if (refreshStock || !p.townStock.length) p.townStock = townStock(p);
+    if (refreshStock || !Array.isArray(p.townPotions)) p.townPotions = potionStock();
     const stock = p.townStock;
+    const potions = p.townPotions;
     const owned = [...new Set(p.inventory.filter(id => window.GEAR?.[id]?.price))].filter(id => sellableCount(p,id) > 0);
-    open(town.name, `장비 상점 · ${p.gold} G`, `<p class="town-copy">${town.copy}</p><section class="shop-section"><h3>${town.shop}</h3>${stock.map(id=>shopCard(id,"buy")).join("")}</section><section class="shop-section"><h3>내 장비 판매</h3>${owned.length ? owned.map(id=>shopCard(id,"sell")).join("") : `<p class="empty-journal">판매할 여분 장비가 없습니다.<br>착용 중인 장비는 판매 목록에 표시되지 않습니다.</p>`}</section>`);
+    open(town.name, `장비 상점 · ${p.gold} G`, `<p class="town-copy">${town.copy}</p><section class="shop-section"><h3>${town.shop}</h3><p class="discover-meta">이 지역의 위협도에 맞춘 장비를 취급합니다.</p>${stock.map(id=>shopCard(id,"buy")).join("")}</section><section class="shop-section"><h3>여행 물약</h3>${potions.length ? potions.map(potionCard).join("") : `<p class="empty-journal">오늘은 물약 상인이 다른 길을 택한 듯합니다.</p>`}</section><section class="shop-section"><h3>내 장비 판매</h3>${owned.length ? owned.map(id=>shopCard(id,"sell")).join("") : `<p class="empty-journal">판매할 여분 장비가 없습니다.<br>착용 중인 장비는 판매 목록에 표시되지 않습니다.</p>`}</section>`);
     modal.querySelectorAll("[data-buy]").forEach(button => button.onclick = () => buyGear(button.dataset.buy));
+    modal.querySelectorAll("[data-buy-potion]").forEach(button => button.onclick = () => buyPotion(button.dataset.buyPotion));
     modal.querySelectorAll("[data-sell]").forEach(button => button.onclick = () => sellGear(button.dataset.sell));
   }
   function buyGear(id) {
     const p = ensure(), gear = window.GEAR?.[id];
     if (!gear || gear.unique) { game.log("보스 고유 장비는 상점에서 살 수 없다. 수호자를 쓰러뜨려 획득해야 한다."); return openTown(); }
-    if (p.gold < gear.price) { game.log("금화가 부족하다."); return openTown(); }
-    p.gold -= gear.price; p.inventory.push(id);
-    game.log(`${gear.name}을(를) ${gear.price} G에 구매했다.`);
+    const price = shopPrice(gear);
+    if (p.gold < price) { game.log("금화가 부족하다."); return openTown(); }
+    p.gold -= price; p.inventory.push(id);
+    game.log(`${gear.name}을(를) ${price} G에 구매했다.`);
     openTown(); game.render();
   }
   function sellGear(id) {
@@ -278,6 +301,14 @@
     if (sellableCount(p,id) < 1) { game.log("착용 중인 장비는 먼저 장비 탭에서 해제해야 판매할 수 있다."); return openTown(); }
     p.inventory.splice(index, 1); p.gold += Math.floor(gear.price / 2);
     game.log(`${gear.name}을(를) ${Math.floor(gear.price / 2)} G에 판매했다.`);
+    openTown(); game.render();
+  }
+  function buyPotion(id) {
+    const p = ensure(), potion = window.ITEMS?.[id];
+    if (!potion?.price || !["healthPotion", "staminaPotion"].includes(id)) return openTown();
+    if (p.gold < potion.price) { game.log("금화가 부족하다."); return openTown(); }
+    p.gold -= potion.price; p.inventory.push(id);
+    game.log(`${potion.name}을(를) ${potion.price} G에 구매했다. 가방에서 필요할 때 사용할 수 있다.`);
     openTown(); game.render();
   }
   function rollDrops(dropPool, gearId) {

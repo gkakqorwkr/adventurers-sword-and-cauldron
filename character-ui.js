@@ -125,9 +125,17 @@
   function openModal(title, kicker, body) { modal.querySelector("h2").textContent = title; modal.querySelector(".game-modal__head p").textContent = kicker; modal.querySelector(".game-modal__body").innerHTML = body; modal.classList.add("is-open"); }
   function openInventory() {
     const p = game.player; const current = stacks(p.inventory.filter(id => !GEAR[id]));
-    const cells = Object.entries(current).map(([id, qty]) => { const data = item(id); return `<article class="item-cell"><span class="item-cell__icon">${data.icon}</span><strong>${data.name}</strong><small>${data.type}</small><b>×${qty}</b></article>`; });
+    const cells = Object.entries(current).map(([id, qty]) => { const data = item(id), usable = data.hpRestore || data.staminaRestore; return `<article class="item-cell"><span class="item-cell__icon">${data.icon}</span><strong>${data.name}</strong><small>${data.type}${data.effect ? ` · ${data.effect}` : ""}</small><b>×${qty}</b>${usable ? `<button type="button" class="item-use" data-use-item="${id}">사용</button>` : ""}</article>`; });
     while (cells.length < 12) cells.push(`<div class="empty-cell">+<br>빈 칸</div>`);
     openModal("여행 가방", `${Object.keys(current).length} / 12 SLOTS`, `<p class="modal-note">식재료, 도구, 마물 부산물을 보관합니다. 장비는 하단의 장비 탭에서 관리할 수 있습니다.</p><div class="inventory-cells">${cells.join("")}</div>`);
+    modal.querySelectorAll("[data-use-item]").forEach(button => button.onclick = () => useConsumable(button.dataset.useItem));
+  }
+  function useConsumable(id) {
+    const p = game.player, data = item(id), index = p.inventory.indexOf(id);
+    if (index < 0 || (!data.hpRestore && !data.staminaRestore)) return;
+    p.inventory.splice(index, 1);
+    p.hp += data.hpRestore || 0; p.stamina += data.staminaRestore || 0;
+    game.clamp(); game.log(`${data.name}을(를) 사용했다. ${data.effect}`); game.render(); openInventory();
   }
   function openEquipment() {
     const p = game.player; const current = stacks(p.inventory.filter(id => GEAR[id])); const equipped = p.equipment || {};
