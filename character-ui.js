@@ -118,7 +118,7 @@
     const attributes = { ...base };
     Object.entries(race.bonus).forEach(([key, value]) => attributes[key] += value);
     Object.values(player.equipment || {}).filter(Boolean).forEach(id => Object.entries(GEAR[id].mods).forEach(([key, value]) => attributes[key] += value));
-    (player.statusEffects || []).filter(effect => effect.turns > 0).forEach(effect => Object.entries(effect.mods || {}).forEach(([key, value]) => attributes[key] += value));
+    (player.statusEffects || []).filter(effect => effect.permanent || effect.turns > 0).forEach(effect => Object.entries(effect.mods || {}).forEach(([key, value]) => attributes[key] += value));
     player.attributes = attributes;
     player.maxHp = 14 + attributes.constitution * 3;
     player.maxStamina = 6 + attributes.wisdom * 2;
@@ -176,8 +176,8 @@
   }
   function openGrowth() {
     const p = game.player; const rows = Object.keys(STAT_NAMES).map(key => `<div class="growth-row"><span>${STAT_NAMES[key]} <small>${STAT_HELP[key]}</small></span><b>${p.attributes[key]}</b><button type="button" data-grow="${key}" ${p.unspentPoints ? "" : "disabled"}>+</button></div>`).join("");
-    const effects = (p.statusEffects || []).filter(effect => effect.turns > 0);
-    const effectList = effects.length ? effects.map(effect => `<li><b>${effect.name || effect.id}</b><span>${effect.effect || "효과 적용 중"} · ${effect.turns}턴 남음</span></li>`).join("") : `<li class="effect-empty">현재 지속 효과가 없습니다.</li>`;
+    const effects = (p.statusEffects || []).filter(effect => effect.permanent || effect.turns > 0);
+    const effectList = effects.length ? effects.map(effect => `<li><b>${effect.name || effect.id}</b><span>${effect.effect || "효과 적용 중"} · ${effect.permanent ? "영구" : `${effect.turns}턴 남음`}</span></li>`).join("") : `<li class="effect-empty">현재 지속 효과가 없습니다.</li>`;
     openModal("성장과 능력치", "LEVEL ${p.level} · XP ${p.xp}/${p.nextLevelXp}", `<p class="growth-summary">사용 가능한 성장 포인트: <strong>${p.unspentPoints || 0}</strong></p><div class="growth-list">${rows}</div><section class="effect-panel"><h3>지속 효과</h3><ul>${effectList}</ul></section>`);
     modal.querySelectorAll("[data-grow]").forEach(button => button.onclick = () => { if (!p.unspentPoints) return; p.baseAttributes[button.dataset.grow] += 1; p.unspentPoints -= 1; recompute(p); game.log(`${STAT_NAMES[button.dataset.grow]}이 1 올랐다.`); game.render(); openGrowth(); });
   }

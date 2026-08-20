@@ -24,6 +24,16 @@
     { traveler:true, name:"수레꾼 도렌", portrait:"assets/portraits/variants/dwarf-3.png", text:"먼 길을 가는 수레의 바퀴가 진흙에 빠졌다.", choices:[["힘","수레를 밀어 올린다","strength",12,"gear"],["카리스마","다른 여행자에게 도움을 청한다","charisma",13,"gold"],["건강","짐을 나르며 길을 낸다","constitution",13,"supply"]] },
     { traveler:true, name:"별노래 리라", portrait:"assets/portraits/variants/elf-1.png", affinity:true, text:"모닥불 곁에서 다음 지역의 전설을 노래하고 있다.", choices:[["카리스마","노래에 화음을 보탠다","charisma",12,"gold"],["지혜","전설 속 경고를 새겨 듣는다","wisdom",13,"recipe"],["민첩","사라진 악보 조각을 찾아온다","agility",14,"gear"]] }
   ];
+  const bondBlessings = {
+    "떠돌이 조리사 마렉": { mods:{ intelligence:1, wisdom:1 }, text:"요리 기술 판정과 기력 회복의 감각" },
+    "엘린 이끼 약초꾼": { mods:{ wisdom:1, constitution:1 }, text:"독초를 가려내는 감각과 단단한 내성" },
+    "토르안 길목 수호자": { mods:{ strength:1, constitution:1 }, text:"길목을 지키는 힘과 버팀" },
+    "네르 갈대 의술사": { mods:{ intelligence:1, constitution:1 }, text:"치유 지식과 독에 대한 저항" },
+    "릴라 재목동": { mods:{ charisma:1, agility:1 }, text:"짐승을 다루는 친화력과 민첩한 발" },
+    "브롬 광맥 측량사": { mods:{ intelligence:2 }, text:"룬과 광맥을 읽는 통찰" },
+    "이아 불꽃 전령": { mods:{ charisma:1, wisdom:1 }, text:"위험을 알리는 목소리와 불길한 직감" },
+    "별노래 리라": { mods:{ charisma:2 }, text:"이야기를 움직이는 별노래의 여운" }
+  };
   let game, modal;
   const esc = value => String(value).replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" })[char]);
   const region = () => window.REGIONS.find(row => row.id === game.player.currentRegionId) || window.REGIONS[0];
@@ -35,12 +45,28 @@
     p.regionNpcInteractions ||= 0;
     p.regionGateState ||= "exploring";
     p.npcAffection ||= {};
+    p.npcAffectionRewards ||= {};
     return p;
   }
   function open(title, kicker, body) { modal.querySelector("h2").textContent = title; modal.querySelector("header p").textContent = kicker; modal.querySelector(".progress-modal__body").innerHTML = body; modal.classList.add("open"); }
   function close() { modal.classList.remove("open"); }
   function recordStory(title, detail) { const p = ensure(); p.story ||= []; p.story.unshift({ title, detail }); p.story = p.story.slice(0, 20); }
   function grantRecipe() { const p = ensure(); p.discoveredRecipes ||= []; const choices = (window.REGIONAL_RECIPES || []).filter(recipe => recipe.region === region().id && !p.discoveredRecipes.includes(recipe.id)); if (!choices.length) return "새로운 조리법의 단서는 이미 모두 익숙하다."; const recipe = choices[Math.floor(Math.random() * choices.length)]; p.discoveredRecipes.push(recipe.id); return `${recipe.name} 레시피를 배웠다.`; }
+  function grantAffinityRewards(npc, before, after) {
+    const p = ensure(), rewards = p.npcAffectionRewards, key = npc.name, detail = [], index = window.REGIONS.indexOf(region());
+    const unlock = (level, action) => { const id = `${key}:${level}`; if (before < level && after >= level && !rewards[id]) { rewards[id] = true; action(); } };
+    unlock(20, () => detail.push("당신을 믿기 시작했다."));
+    unlock(50, () => detail.push(`신뢰의 답례로 ${grantRecipe()}`));
+    unlock(80, () => { const gear = gearDrops(index, true)[0]; if (gear) { p.inventory.push(gear); detail.push(`${window.GEAR[gear].name}을(를) 건넸다.`); } });
+    unlock(100, () => {
+      const blessing = bondBlessings[key] || { mods:{ charisma:1, wisdom:1 }, text:"깊은 신뢰가 남긴 축복" };
+      p.statusEffects.push({ id:`bond-${key}`, name:`${key}의 인연`, permanent:true, effect:blessing.text, mods:blessing.mods });
+      window.refreshPlayerStats?.();
+      p.regionalFollowups ||= []; p.regionalFollowups.push({ kind:"bond", npc:key, regionId:region().id });
+      detail.push(`최대 호감도 달성! 「${key}의 인연」 영구 효과를 얻었다.`);
+    });
+    return detail.join(" ");
+  }
   function gearDrops(index, guaranteed = false) {
     const tiers = [[0, 70], [60, 105], [90, 140], [115, 175], [140, Infinity]];
     const [min, max] = tiers[Math.max(0, Math.min(index, tiers.length - 1))];
@@ -110,7 +136,7 @@
         else if (choice[4] === "recipe") detail = grantRecipe();
         else if (choice[4] === "supply") { const supplies = monsters().filter(row => row.region === region().id); const found = supplies[Math.floor(Math.random() * supplies.length)].dropId; p.inventory.push(found); detail = `${window.ITEMS[found]?.name || found}을(를) 받았다.`; }
         else { const drop = gearDrops(index, Math.random() < .45); if (drop.length) { p.inventory.push(...drop); detail = `${window.GEAR[drop[0]].name}을(를) 받았다.`; } else { p.gold += 15; detail = "금화 15G를 받았다."; } queueFollowup(); }
-        if (npc.affinity) { const gain = 7 + Math.floor(Math.random() * 4); p.npcAffection[npc.name] = Math.min(100, affection + gain); detail += ` 호감도 +${gain} (${p.npcAffection[npc.name]}/100).`; }
+        if (npc.affinity) { const gain = 7 + Math.floor(Math.random() * 4), next = Math.min(100, affection + gain); p.npcAffection[npc.name] = next; const bondDetail = grantAffinityRewards(npc, affection, next); detail += ` 호감도 +${gain} (${next}/100).${bondDetail ? ` ${bondDetail}` : ""}`; }
         p.xp += 6;
       } else { p.xp += 2; detail = "도움에는 실패했지만 경험치 2를 얻었다."; }
       game.clamp(); recordStory(npc.name, `${choice[1]} — ${success ? "성공" : "실패"}. ${detail}`); game.log(`${npc.name}과(와) 교류했다. ${detail}`); markGate(); close(); game.render();
@@ -150,7 +176,8 @@
   function queueFollowup() { const p = ensure(); p.regionalFollowups ||= []; p.regionalFollowups.push({ regionId: region().id }); game.log("작은 도움의 여파가 훗날 다시 돌아올지도 모른다."); }
   function resolveFollowup() {
     const p = ensure(), event = p.regionalFollowups.shift(), here = window.REGIONS.find(row => row.id === event.regionId) || region(); let title, detail, reward;
-    if (here.id === "prairie") { title = "샐러맨더 둥지의 답례"; if (Math.random() < .5) { window.ITEMS.fireOrb ||= { id:"fireOrb", name:"불의 보주", type:"ingredient", icon:window.ITEMS.emberHeart?.icon, tags:["화염","마력"], toxicity:0 }; p.inventory.push("fireOrb"); detail = "지나쳤던 샐러맨더의 어미가 불의 보주를 발치에 놓고 사라졌다."; reward = "불의 보주를 얻었다."; } else { detail = "샐러맨더의 어미는 당신을 잠시 바라보다가 조용히 길을 비켜 주었다."; p.xp += 8; reward = "경험치 8을 얻었다."; } }
+    if (event.kind === "bond") { const gear = gearDrops(window.REGIONS.indexOf(here), true)[0]; title = `${event.npc}의 약속`; detail = `${event.npc}이(가) 당신의 여정을 기억하고 다시 찾아왔다. 더 먼 길에서도 서로 돕자는 약속을 나눈다.`; if (gear) { p.inventory.push(gear); reward = `${window.GEAR[gear].name}을(를) 인연의 선물로 받았다.`; } else { p.gold += 30; reward = "금화 30G를 인연의 선물로 받았다."; } }
+    else if (here.id === "prairie") { title = "샐러맨더 둥지의 답례"; if (Math.random() < .5) { window.ITEMS.fireOrb ||= { id:"fireOrb", name:"불의 보주", type:"ingredient", icon:window.ITEMS.emberHeart?.icon, tags:["화염","마력"], toxicity:0 }; p.inventory.push("fireOrb"); detail = "지나쳤던 샐러맨더의 어미가 불의 보주를 발치에 놓고 사라졌다."; reward = "불의 보주를 얻었다."; } else { detail = "샐러맨더의 어미는 당신을 잠시 바라보다가 조용히 길을 비켜 주었다."; p.xp += 8; reward = "경험치 8을 얻었다."; } }
     else { title = "도움의 여파"; if (Math.random() < .5) { p.gold += 18; detail = `${here.name}에서 도왔던 여행자가 다시 나타나 금화 주머니를 건넸다.`; reward = "금화 18G를 얻었다."; } else { const found = monsters().find(row => row.region === here.id); p.inventory.push(found.dropId); detail = `${here.name}에서 만났던 이가 희귀한 마물 재료를 답례로 보냈다.`; reward = `${window.ITEMS[found.dropId]?.name || found.dropId}을(를) 얻었다.`; } }
     recordStory(title, detail); game.log(`${detail} ${reward}`); open(title, "FOLLOW-UP STORY", `<article class="progress-card"><p>${detail}</p><p>${reward}</p><button type="button" data-close>여정을 계속한다</button></article>`); modal.querySelector("[data-close]").onclick = () => { close(); game.render(); };
   }
