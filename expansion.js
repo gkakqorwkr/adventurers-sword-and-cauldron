@@ -233,7 +233,13 @@
     game.clamp(); record(title,outcome.story || choice.story); close(); game.render();
   }
   function chooseNpc(npc,choice) { applyChoice(npc.name, choice); }
-  function openStory() { const p=ensure(); open("갈림길의 기록","YOUR ADVENTURE",p.story.length?`<ol class="story-log">${p.story.map(entry=>`<li><b>${esc(entry.title)}</b>${esc(entry.detail)}</li>`).join("")}</ol>`:`<p class="empty-journal">아직 당신의 이야기는 첫 장입니다.<br>탐험 중 만나는 사람과 마물에게 선택을 남겨 보세요.</p>`); }
+  function openStory() {
+    const p=ensure(), rank = value => value >= 100 ? "인연" : value >= 80 ? "친밀" : value >= 50 ? "신뢰" : value >= 20 ? "호의" : "낯섦";
+    const people = (window.NPC_RELATIONSHIPS || []).filter(npc => Object.hasOwn(p.npcAffection || {}, npc.name) || p.story.some(entry => entry.title === npc.name));
+    const relations = people.length ? `<section class="story-relations"><h3>인연의 기록</h3>${people.map(npc => { const value = p.npcAffection?.[npc.name] || 0, bond = window.NPC_BOND_INFO?.[npc.name], completed = value >= 100; const next = value < 20 ? "20: 호의" : value < 50 ? "50: 레시피" : value < 80 ? "80: 장비 선물" : value < 100 ? "100: 인연 완성" : "인연 완성"; return `<article class="story-bond">${npc.portrait ? `<img src="${npc.portrait}" alt="${esc(npc.name)}">` : ""}<div><p>${esc(npc.region)}</p><h4>${esc(npc.name)} <span>${rank(value)}</span></h4><div class="story-bond__meter"><span style="width:${value}%"></span></div><strong>♥ ${value}/100</strong><small>${completed ? `「${esc(npc.name)}의 인연」 · ${esc(bond?.text || "깊은 신뢰가 남긴 축복")}` : `다음 관계 보상: ${next}`}</small></div></article>`; }).join("")}</section>` : "";
+    const chronicle = p.story.length ? `<section class="story-chronicle"><h3>모험 기록</h3><ol class="story-log">${p.story.map(entry=>`<li><b>${esc(entry.title)}</b>${esc(entry.detail)}</li>`).join("")}</ol></section>`:`<p class="empty-journal">아직 당신의 이야기는 첫 장입니다.<br>탐험 중 만나는 사람과 마물에게 선택을 남겨 보세요.</p>`;
+    open("갈림길의 기록","YOUR ADVENTURE",`${relations}${chronicle}`);
+  }
   function openWorldEvent(event) { open(event.title,event.role.toUpperCase(),`<article class="npc-card"><h3 class="npc-card__name">${event.title}</h3><p class="npc-card__role">${event.role}</p><p class="npc-card__text">${event.text}</p><div class="npc-choices">${event.choices.map((choice,index)=>`<button type="button" data-world-choice="${index}">${choice.label}</button>`).join("")}</div></article>`); modal.querySelectorAll("[data-world-choice]").forEach(button=>button.onclick=()=>applyChoice(event.title,event.choices[Number(button.dataset.worldChoice)])); }
   function resolveFollowup(id) {
     const outcomes = followups[id]; if (!outcomes?.length) return false;

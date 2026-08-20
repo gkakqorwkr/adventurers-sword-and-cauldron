@@ -198,6 +198,8 @@
   }
   function boot() {
     game = window.game; if (!game || !window.REGIONS) return setTimeout(boot, 50); ensure();
+    window.NPC_RELATIONSHIPS = npcLines.filter(npc => npc.affinity).map(npc => ({ name:npc.name, portrait:npc.portrait || "", region:npc.region || "떠돌이" }));
+    window.NPC_BOND_INFO = bondBlessings;
     modal = document.createElement("div"); modal.className = "progress-modal"; modal.innerHTML = '<div class="progress-modal__shade"></div><section class="progress-modal__panel"><header><div><p></p><h2></h2></div><button type="button" aria-label="닫기">×</button></header><div class="progress-modal__body"></div></section>'; document.body.append(modal); modal.querySelector(".progress-modal__shade").onclick = close; modal.querySelector("header button").onclick = close;
     game.explore = explore;
     const previousAttack = game.combat.attack.bind(game.combat);

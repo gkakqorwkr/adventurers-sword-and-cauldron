@@ -124,7 +124,7 @@ function bar(label, value, max, className = "") { return `<div class="meter"><di
 function render(g) {
   const p = g.player; const race = RACES[p.raceId];
   document.querySelector("#location").textContent = g.scene === "camp" ? "잿불 길드의 야영지" : g.scene === "combat" ? "안개 낀 숲길 — 전투" : "안개 낀 숲길";
-  const activeEffects = (p.statusEffects || []).filter(effect => effect.permanent || effect.turns > 0);
+  const activeEffects = (p.statusEffects || []).filter(effect => !effect.permanent && effect.turns > 0);
   const satietyMod = p.hunger >= 90 ? 2 : p.hunger >= 75 ? 1 : p.hunger <= 10 ? -3 : p.hunger <= 25 ? -2 : p.hunger <= 45 ? -1 : 0;
   const satietyText = satietyMod ? `🍽 ${p.hunger >= 75 ? "든든함" : "허기"}: 공격 ${satietyMod > 0 ? "+" : ""}${satietyMod}` : "🍽 평상시 포만감";
   const effectText = `<p class="active-effects">${satietyText}${activeEffects.length ? ` · ${activeEffects.map(effect => `✦ ${effect.name || effect.id} ${effect.permanent ? "영구" : `${effect.turns}턴`}`).join(" · ")}` : ""}</p>`;
