@@ -66,6 +66,18 @@
     deepcoreStaff:{name:"심층 핵석 지팡이",icon:"🪄",slot:"weapon",label:"보스 고유 무기",mods:{intelligence:3,wisdom:2},price:410,description:"광맥의 철거인 심핵으로 만든, 심층 마력을 다루는 지팡이.",unique:true},
     lavaHeartAegis:{name:"용암 심장 방패",icon:"🛡️",slot:"armor",label:"보스 고유 방어구",mods:{constitution:3,strength:2},price:450,description:"용암 심장룡의 비늘을 벼려 만든, 열기에도 흔들리지 않는 방패.",unique:true}
   });
+  // 같은 능력치 조합을 반복하지 않도록 장비마다 명확한 전투·판정 역할을 부여한다.
+  const gearBalance = {
+    boarSpear:{mods:{strength:2,constitution:1}}, emberDagger:{mods:{agility:2,intelligence:1}}, hunterBow:{mods:{agility:3,charisma:1}}, runeStaff:{mods:{intelligence:3,wisdom:1}}, sageWand:{mods:{intelligence:2,wisdom:2}}, oakMaul:{mods:{strength:3,constitution:2}}, crystalRapier:{mods:{agility:3,intelligence:2}}, frostSickle:{mods:{agility:3,wisdom:2}}, drakeLance:{mods:{strength:3,intelligence:2}}, shadowKnife:{mods:{agility:3,charisma:2}}, mossAxe:{mods:{strength:3,wisdom:2}}, thunderHammer:{mods:{strength:5}}, pilgrimCenser:{mods:{wisdom:3,charisma:2}}, starSeekerStaff:{mods:{intelligence:4,wisdom:3}},
+    spiderSilkVest:{mods:{agility:2,constitution:1}}, mossAegis:{mods:{constitution:3,strength:1}}, scaleMail:{mods:{constitution:3,strength:2}}, emberMantle:{mods:{intelligence:2,constitution:2}}, frostCloak:{mods:{wisdom:3,agility:2}}, runicRobe:{mods:{intelligence:4,wisdom:1}}, bardicCoat:{mods:{charisma:3,agility:2}}, thornHarness:{mods:{constitution:3,strength:2}}, mistVeil:{mods:{agility:3,intelligence:2}}, ironbarkPlate:{mods:{constitution:5}}, velvetDuelist:{mods:{charisma:5}}, dragonskinVest:{mods:{strength:3,constitution:3}}, moonweaveDress:{mods:{wisdom:3,intelligence:3}}, wandererBoots:{mods:{agility:5}},
+    moonRing:{mods:{wisdom:2,charisma:1}}, mimicLocket:{mods:{charisma:3}}, scholarLens:{mods:{intelligence:3}}, compassCharm:{mods:{wisdom:3}}, gamblersCoin:{mods:{charisma:2,agility:2}}, boarTuskPendant:{mods:{strength:3}}, vitalityBrooch:{mods:{constitution:3}}, swiftFeather:{mods:{agility:3}}, runeEarCuff:{mods:{intelligence:2,wisdom:2}}, courageMedal:{mods:{strength:2,charisma:2}}, whisperingShell:{mods:{charisma:3,wisdom:2}}, dwarvenSeal:{mods:{strength:2,constitution:2}}, phoenixPin:{mods:{intelligence:2,charisma:2}}, shadowBead:{mods:{agility:2,intelligence:2}}, tidePearl:{mods:{wisdom:2,constitution:2}}, oracleCards:{mods:{wisdom:3,charisma:3}}, sunMedallion:{mods:{strength:2,wisdom:2}}, alchemyVial:{mods:{intelligence:3,constitution:2}}, frostSigil:{mods:{wisdom:2,agility:2}},
+    hornKingSpear:{mods:{strength:4,agility:2}}, myceliumCrown:{mods:{intelligence:3,wisdom:3}}, emberManeBlade:{mods:{strength:4,charisma:3}}, deepcoreStaff:{mods:{intelligence:4,wisdom:3}}, lavaHeartAegis:{mods:{constitution:4,strength:3}}
+  };
+  Object.entries(gearBalance).forEach(([id, tuning]) => Object.assign(GEAR[id], tuning));
+  Object.values(GEAR).forEach(gear => {
+    const score = Object.values(gear.mods).reduce((sum, value) => sum + value, 0);
+    gear.tier = gear.unique ? "보스 유물" : score >= 7 ? "전설" : score >= 5 ? "영웅" : score >= 4 ? "희귀" : "정교";
+  });
   const ITEMS = {
     fieldKnife: { name: "야전 나이프", icon: "🔪", type: "도구", description: "마물 손질에 쓰는 날카로운 칼." },
     ironPot: { name: "철 솥", icon: "⚱", type: "도구", description: "야영지의 기본 조리 도구." },
@@ -110,8 +122,8 @@
     player.attributes = attributes;
     player.maxHp = 14 + attributes.constitution * 3;
     player.maxStamina = 6 + attributes.wisdom * 2;
-    player.hp = Math.min(player.maxHp, player.hp || player.maxHp);
-    player.stamina = Math.min(player.maxStamina, player.stamina || player.maxStamina);
+    player.hp = Math.min(player.maxHp, player.hp ?? player.maxHp);
+    player.stamina = Math.min(player.maxStamina, player.stamina ?? player.maxStamina);
   }
   function syncLevel() {
     const p = game.player; if (!p.nextLevelXp) p.nextLevelXp = 10;
@@ -142,7 +154,7 @@
     const p = game.player; const current = stacks(p.inventory.filter(id => GEAR[id])); const equipped = p.equipment || {};
     const labels = { weapon: "무기", armor: "방어구", accessory: "장신구", accessory2: "보조 장신구" };
     const slots = ["weapon", "armor", "accessory", "accessory2"].map(slot => `<div class="equip-slot"><small>${labels[slot]}</small><b>${equipped[slot] ? `${GEAR[equipped[slot]].icon} ${GEAR[equipped[slot]].name}` : "비어 있음"}</b></div>`).join("");
-    const cells = Object.entries(current).map(([id, qty]) => { const gear = GEAR[id], isEquipped = Object.values(equipped).includes(id); return `<article class="item-cell"><span class="item-cell__icon">${gear.icon}</span><strong>${gear.name}</strong><small>${gear.label} · ${modifiersText(gear.mods)}</small><b>×${qty}</b><button type="button" data-equip="${id}">${isEquipped ? "장착 해제" : "장착"}</button></article>`; });
+    const cells = Object.entries(current).map(([id, qty]) => { const gear = GEAR[id], isEquipped = Object.values(equipped).includes(id); return `<article class="item-cell"><span class="item-cell__icon">${gear.icon}</span><strong>${gear.name}</strong><small>${gear.label} · ${gear.tier || "일반"} · ${modifiersText(gear.mods)}</small><b>×${qty}</b><button type="button" data-equip="${id}">${isEquipped ? "장착 해제" : "장착"}</button></article>`; });
     while (cells.length < 6) cells.push(`<div class="empty-cell">+<br>장비 칸</div>`);
     openModal("장비 관리", `${Object.keys(current).length} 종류 · ${p.gold || 0} G`, `<p class="modal-note">무기, 방어구, 장신구와 보조 장신구를 각각 하나씩 장착할 수 있습니다. 장비 효과는 능력치와 전투 판정에 즉시 반영됩니다.</p><div class="equip-slots">${slots}</div><div class="inventory-cells">${cells.join("")}</div>`);
     modal.querySelectorAll("[data-equip]").forEach(button => button.onclick = () => equip(button.dataset.equip));
@@ -188,7 +200,7 @@
   function appearanceRow(label, part, colors) { return `<div class="appearance-row"><label>${label}</label><div class="swatches">${colors.map(color => `<button type="button" class="swatch ${state.appearance[part] === color ? "is-selected" : ""}" style="--swatch:${color}" data-part="${part}" data-swatch="${color}"></button>`).join("")}</div></div>`; }
   function randomPortrait() { const picks = { skin: ["#c88864", "#e1ad7c", "#9b624b", "#704134"], hair: ["#342019", "#7d4b2a", "#d6ad54", "#d6d2c4"], eyes: ["#6fbd9c", "#6d9bd0", "#b67c5e", "#a594d4"] }; Object.keys(picks).forEach(key => state.appearance[key] = picks[key][Math.floor(Math.random() * picks[key].length)]); renderCreator(); }
   function confirmCreator() {
-    const p = game.player; p.name = state.name.trim() || "이름 없는 모험가"; p.raceId = state.race; p.baseAttributes = { ...state.stats }; p.appearance = { ...state.appearance }; p.portraitKey = window.getSelectedPortraitKey?.(state.race) || null; p.portraitImage = window.getSelectedPortraitSrc?.(state.race) || null; p.level = 1; p.xp = 0; p.gold = 35; p.nextLevelXp = 10; p.unspentPoints = 0; p.statusEffects = []; p.equipment = { weapon: "rustSword", armor: "leatherCoat", accessory: "amberCharm", accessory2: null }; p.inventory = ["fieldKnife", "ironPot", "slimeGel", "bitterCap", "bitterCap", "rustSword", "leatherCoat", "amberCharm"]; p.hp = 999; p.stamina = 999; p.hunger = 78; recompute(p); game.log(`${p.name}, ${RACES[p.raceId].name} 모험가가 길드에 등록되었다.`); creator.hidden = true; game.render();
+    const p = game.player; game.gameOver = false; p.name = state.name.trim() || "이름 없는 모험가"; p.raceId = state.race; p.baseAttributes = { ...state.stats }; p.appearance = { ...state.appearance }; p.portraitKey = window.getSelectedPortraitKey?.(state.race) || null; p.portraitImage = window.getSelectedPortraitSrc?.(state.race) || null; p.level = 1; p.xp = 0; p.gold = 35; p.nextLevelXp = 10; p.unspentPoints = 0; p.statusEffects = []; p.equipment = { weapon: "rustSword", armor: "leatherCoat", accessory: "amberCharm", accessory2: null }; p.inventory = ["fieldKnife", "ironPot", "slimeGel", "bitterCap", "bitterCap", "rustSword", "leatherCoat", "amberCharm"]; p.hp = 999; p.stamina = 999; p.hunger = 78; recompute(p); game.log(`${p.name}, ${RACES[p.raceId].name} 모험가가 길드에 등록되었다.`); creator.hidden = true; game.render();
   }
   function showCreator() { if (!state) state = { name: "리아", race: "human", stats: { strength: 2, agility: 2, intelligence: 2, charisma: 2, constitution: 2, wisdom: 2 }, points: 8, appearance: { skin: "#c88864", hair: "#342019", eyes: "#6fbd9c" } }; creator.hidden = false; renderCreator(); }
   function boot() {

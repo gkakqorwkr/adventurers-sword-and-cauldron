@@ -68,6 +68,27 @@
     addition.monsters.forEach(spec => { const [id, name, hp, atk, def, dropId, dropName] = spec; region.monsters.push(spec); monsters.push({ id, name, hp, atk, def, dropId, dropName, region: region.id, image: `assets/monsters-v3/m${String(addedMonsterImage++).padStart(2, "0")}.png` }); });
     addition.recipes.forEach(spec => { const [id, name, need, hunger, hp, effect, stamina = 0] = spec; region.recipes.push(spec); recipes.push({ id, name, need, hunger, hp, stamina, effect, region: region.id, image: recipeArt[id] || "assets/foods/r01.png" }); });
   });
+  const specialtyByMonster = {
+    mossSlime:"bulwark",hornBoar:"assault",caveSpider:"skirmisher",moonMoth:"skirmisher",forestWolf:"assault",mossGoblin:"skirmisher",shadeRaven:"skirmisher",thornStag:"assault",whisperFox:"skirmisher",barkTreant:"bulwark",
+    mossTurtle:"bulwark",bogWisp:"skirmisher",fungusSovereign:"bulwark",swampSerpent:"skirmisher",mireGolem:"bulwark",carnivorousPlant:"assault",leechSwarm:"skirmisher",bogCroc:"assault",reedSiren:"skirmisher",frogKing:"bulwark",
+    fireLizard:"assault",ashRam:"assault",cinderHyena:"skirmisher",emberElemental:"assault",fireBeetle:"bulwark",charcoalLion:"assault",lavaScorpion:"bulwark",emberSalamander:"assault",ashVulture:"skirmisher",coalBuffalo:"bulwark",
+    mimic:"assault",crystalDeer:"skirmisher",skeletonMiner:"assault",oreGolem:"bulwark",caveBat:"skirmisher",rustAutomaton:"bulwark",blindWorm:"assault",lanternWraith:"skirmisher",crystalSpider:"bulwark",tunnelMole:"assault",
+    youngDragon:"assault",magmaGolem:"bulwark",canyonWyvern:"skirmisher",basaltTroll:"bulwark",volcanicSerpent:"skirmisher",fireWraith:"skirmisher",ashHarpy:"skirmisher",obsidianBasilisk:"bulwark",ashChimera:"assault",sunScorpion:"bulwark"
+  };
+  const monsterProfiles = {
+    assault:{label:"공격형", hp:0.94, atk:3, def:-1, agility:4},
+    bulwark:{label:"방어형", hp:1.25, atk:-1, def:3, agility:1},
+    skirmisher:{label:"민첩형", hp:0.84, atk:1, def:-1, agility:8}
+  };
+  monsters.forEach(monster => {
+    const rank = Math.max(0, regions.findIndex(region => region.id === monster.region));
+    const profile = monsterProfiles[specialtyByMonster[monster.id] || "assault"];
+    monster.hp = Math.max(8, Math.round(monster.hp * profile.hp + rank * 2));
+    monster.atk = Math.max(1, monster.atk + profile.atk + rank);
+    monster.def = Math.max(0, monster.def + profile.def + Math.floor(rank / 2));
+    monster.agility = profile.agility + rank;
+    monster.role = profile.label;
+  });
   const escape = value => String(value).replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[char]);
 
   function currentRegion(player) { return regions.find(region => region.id === player.currentRegionId) || (player.level < 3 ? regions[0] : player.level < 5 ? regions[1] : player.level < 7 ? regions[2] : player.level < 9 ? regions[3] : regions[4]); }
@@ -84,7 +105,7 @@
     const section = region => {
       const seenMonsters = monsters.filter(monster => monster.region === region.id && player.discoveredRegionalMonsters.includes(monster.id));
       const seenRecipes = recipes.filter(recipe => recipe.region === region.id && player.discoveredRecipes.includes(recipe.id));
-      const monsterCards = seenMonsters.length ? seenMonsters.map(monster => `<article class="regional-card"><img src="${monster.image}" alt="${escape(monster.name)}" /><div><h3>${escape(monster.name)}</h3><p>HP ${monster.hp} · 공격 ${monster.atk} · 방어 ${monster.def}</p><small>식재료: ${escape(monster.dropName)}</small></div></article>`).join("") : '<p class="regional-empty">아직 이 지역에서 발견한 마물이 없습니다.</p>';
+      const monsterCards = seenMonsters.length ? seenMonsters.map(monster => `<article class="regional-card"><img src="${monster.image}" alt="${escape(monster.name)}" /><div><h3>${escape(monster.name)}</h3><p>${monster.role} · HP ${monster.hp} · 공격 ${monster.atk} · 방어 ${monster.def} · 민첩 ${monster.agility}</p><small>식재료: ${escape(monster.dropName)}</small></div></article>`).join("") : '<p class="regional-empty">아직 이 지역에서 발견한 마물이 없습니다.</p>';
       const recipeCards = seenRecipes.length ? seenRecipes.map(recipe => `<article class="regional-card recipe"><img src="${recipe.image}" alt="${escape(recipe.name)}" /><div><h3>${escape(recipe.name)}</h3><p>${recipe.need.map(id => escape(window.ITEMS[id]?.name || id)).join(" + ")}</p><small>${escape(recipe.effect)}</small></div></article>`).join("") : '<p class="regional-empty">아직 이 지역에서 완성한 요리가 없습니다.</p>';
       return `<section class="regional-section"><h3>${region.name}</h3><p class="regional-count">마물 ${seenMonsters.length}/${region.monsters.length} · 요리 ${seenRecipes.length}/${region.recipes.length}</p><h4>발견한 마물</h4><div class="regional-grid">${monsterCards}</div><h4>발견한 요리</h4><div class="regional-grid">${recipeCards}</div></section>`;
     };
@@ -125,7 +146,7 @@
       }
     };
     const previousExplore = game.explore.bind(game);
-    game.explore = () => { if (game.enemy || Math.random() > .58) return previousExplore(); const player = game.player; game.advanceTurn(); player.stamina -= 2; player.hunger -= 5; game.clamp(); if (!player.hp) return game.defeat(); const region = currentRegion(player), pool = monsters.filter(monster => monster.region === region.id), monster = pool[Math.floor(Math.random() * pool.length)]; player.discoveredRegionalMonsters.push(monster.id); game.enemy = { name: monster.name, hp: monster.hp, maxHp: monster.hp, atk: monster.atk, def: monster.def, drops: [monster.dropId] }; game.scene = "combat"; game.log(`${region.name}에서 ${monster.name}이(가) 길을 막아섰다! ${monster.dropName}을(를) 노려볼 수 있다.`); };
+    game.explore = () => { if (game.enemy || game.gameOver || Math.random() > .58) return previousExplore(); const player = game.player; game.advanceTurn(); if (game.gameOver) return; player.stamina -= 2; player.hunger -= 5; game.clamp(); if (game.gameOver) return; const region = currentRegion(player), pool = monsters.filter(monster => monster.region === region.id), monster = pool[Math.floor(Math.random() * pool.length)]; player.discoveredRegionalMonsters.push(monster.id); game.enemy = { name: monster.name, hp: monster.hp, maxHp: monster.hp, atk: monster.atk, def: monster.def, agility: monster.agility, role: monster.role, drops: [monster.dropId] }; game.scene = "combat"; game.log(`${region.name}에서 ${monster.name}이(가) 길을 막아섰다! ${monster.dropName}을(를) 노려볼 수 있다.`); };
     const book = document.querySelector(".system-dock [data-book]"); if (book) book.onclick = () => openBook(ui, game); game.render();
   }
   document.addEventListener("DOMContentLoaded", boot);

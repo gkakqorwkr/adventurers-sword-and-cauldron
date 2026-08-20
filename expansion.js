@@ -250,7 +250,7 @@
     const gear = window.GEAR?.[id];
     if (!gear) return "";
     const price = mode === "buy" ? shopPrice(gear) : Math.floor(gear.price / 2);
-    return `<article class="shop-card"><span>${gear.icon}</span><div><h4>${gear.name}</h4><p>${gear.label} · ${Object.entries(gear.mods).map(([stat,value])=>`${({strength:"힘",agility:"민첩",intelligence:"지능",charisma:"카리스마",constitution:"건강",wisdom:"지혜"})[stat]} +${value}`).join(" · ")}</p><small>${gear.description}</small></div><button type="button" data-${mode}="${id}">${mode === "buy" ? `${price} G 구매` : `${price} G 판매`}</button></article>`;
+    return `<article class="shop-card"><span>${gear.icon}</span><div><h4>${gear.name}</h4><p>${gear.label} · ${gear.tier || "일반"} · ${Object.entries(gear.mods).map(([stat,value])=>`${({strength:"힘",agility:"민첩",intelligence:"지능",charisma:"카리스마",constitution:"건강",wisdom:"지혜"})[stat]} +${value}`).join(" · ")}</p><small>${gear.description}</small></div><button type="button" data-${mode}="${id}">${mode === "buy" ? `${price} G 구매` : `${price} G 판매`}</button></article>`;
   }
   function shopPrice(gear) { return Math.ceil(gear.price * (1 + regionRank(ensure()) * .2)); }
   function potionCard(id) {

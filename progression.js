@@ -69,13 +69,13 @@
     const ingredients = ingredientDrop(monster);
     const threat = 1 + Math.max(0, regionIndex) * .16;
     const hp = Math.round(monster.hp * threat), atk = monster.atk + Math.max(0, regionIndex), def = monster.def + Math.floor(Math.max(0, regionIndex) / 2);
-    game.enemy = { name: monster.name, hp, maxHp: hp, atk, def, drops: [...ingredients, ...gearDrops(regionIndex)], image: monster.image, regionId: here.id };
+    game.enemy = { name: monster.name, hp, maxHp: hp, atk, def, agility: monster.agility, role: monster.role, drops: [...ingredients, ...gearDrops(regionIndex)], image: monster.image, regionId: here.id };
     game.scene = "combat";
     game.log(`${here.name}에서 ${monster.name}이(가) 나타났다. ${ingredients.length ? `${monster.dropName}을(를) 노려볼 수 있다.` : "이번에는 조리 재료를 지니고 있지 않은 듯하다."}`);
   }
   function spawnBoss() {
     const p = ensure(), here = region(), [name, baseId, hpMult, atkBonus, defBonus, uniqueGear] = bossData[here.id], base = monsters().find(row => row.id === baseId), index = window.REGIONS.indexOf(here);
-    game.enemy = { name, hp: base.hp * hpMult, maxHp: base.hp * hpMult, atk: base.atk + atkBonus, def: base.def + defBonus, drops: [...ingredientDrop(base), uniqueGear, ...gearDrops(index, true)], image: base.image, regionalBoss: true, regionId: here.id };
+    game.enemy = { name, hp: base.hp * hpMult, maxHp: base.hp * hpMult, atk: base.atk + atkBonus, def: base.def + defBonus, agility: base.agility + 2, role: "보스", drops: [...ingredientDrop(base), uniqueGear, ...gearDrops(index, true)], image: base.image, regionalBoss: true, regionId: here.id };
     game.scene = "combat"; p.regionGateState = "boss"; game.log(`${name}이(가) 주술사의 부름에 응답했다. 다음 길을 열려면 쓰러뜨려야 한다.`);
   }
   function openShaman() {
@@ -155,7 +155,7 @@
     recordStory(title, detail); game.log(`${detail} ${reward}`); open(title, "FOLLOW-UP STORY", `<article class="progress-card"><p>${detail}</p><p>${reward}</p><button type="button" data-close>여정을 계속한다</button></article>`); modal.querySelector("[data-close]").onclick = () => { close(); game.render(); };
   }
   function explore() {
-    const p = ensure(); if (game.enemy) return; game.advanceTurn(); p.stamina -= 2; p.hunger -= 5; game.clamp(); if (!p.hp) return game.defeat();
+    const p = ensure(); if (game.enemy || game.gameOver) return; game.advanceTurn(); if (game.gameOver) return; p.stamina -= 2; p.hunger -= 5; game.clamp(); if (game.gameOver) return;
     if (markGate()) return openShaman();
     if (p.regionalFollowups?.length) return resolveFollowup();
     const roll = Math.random();
@@ -174,7 +174,7 @@
     modal = document.createElement("div"); modal.className = "progress-modal"; modal.innerHTML = '<div class="progress-modal__shade"></div><section class="progress-modal__panel"><header><div><p></p><h2></h2></div><button type="button" aria-label="닫기">×</button></header><div class="progress-modal__body"></div></section>'; document.body.append(modal); modal.querySelector(".progress-modal__shade").onclick = close; modal.querySelector("header button").onclick = close;
     game.explore = explore;
     const previousAttack = game.combat.attack.bind(game.combat);
-    game.combat.attack = (...args) => { const enemy = game.enemy; previousAttack(...args); if (!enemy || enemy.hp > 0) return; const p = ensure(); if (enemy.regionalBoss) { recordStory("수호자 격파", `${enemy.name}을(를) 쓰러뜨리고 새로운 길을 마주했다.`); openRoutes("수호자 격파"); return; } if (enemy.regionId) { p.regionBattles += 1; recordStory("마물 사냥", `${region().name}에서 ${enemy.name}을(를) 쓰러뜨렸다.`); markGate(); } };
+    game.combat.attack = (...args) => { const enemy = game.enemy; previousAttack(...args); if (game.gameOver || !enemy || enemy.hp > 0) return; const p = ensure(); if (enemy.regionalBoss) { recordStory("수호자 격파", `${enemy.name}을(를) 쓰러뜨리고 새로운 길을 마주했다.`); openRoutes("수호자 격파"); return; } if (enemy.regionId) { p.regionBattles += 1; recordStory("마물 사냥", `${region().name}에서 ${enemy.name}을(를) 쓰러뜨렸다.`); markGate(); } };
     game.render();
   }
   document.addEventListener("DOMContentLoaded", boot);

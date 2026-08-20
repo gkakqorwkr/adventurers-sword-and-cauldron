@@ -1,0 +1,8 @@
+.system-dock .save-button { border-color:#806e98; background:#302741; }
+.death-modal { position:fixed; z-index:90; inset:0; display:grid; place-items:center; padding:20px; background:rgba(8,4,5,.88); backdrop-filter:blur(4px); }
+.death-modal section { width:min(100%,410px); padding:28px 22px; border:1px solid #a56a5b; background:linear-gradient(145deg,#341d1c,#17100f); color:#ead4b2; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.5); }
+.death-modal p { margin:0; color:#c88272; font-family:"Press Start 2P",monospace; font-size:.42rem; letter-spacing:.08em; }
+.death-modal h2 { margin:12px 0 7px; color:#f1b49d; font-family:"Gowun Batang",serif; font-size:2rem; }
+.death-modal strong,.death-modal span { display:block; font-family:"Gowun Batang",serif; line-height:1.65; }
+.death-modal strong { color:#ffe1c0; font-size:1.06rem; }.death-modal span { margin:14px 0 21px; color:#bfa98f; }
+.death-modal button { width:100%; text-align:center; border-color:#d19372; background:#6b382c; }.death-modal button::after { content:""; }
